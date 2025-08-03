@@ -1,4 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+#
+# Note: Keep these shared configuration directories:
+# - .bmad-core/ (BMad methodology framework)
+# - .augment/ (Augment AI agent rules)
+# - .cursor/ (Cursor AI editor rules)
 
 # dependencies
 /node_modules
@@ -49,12 +54,19 @@ test-*.ts
 coverage/
 .nyc_output/
 
-# IDE and editor files
+# IDE and editor files (personal preferences)
 .vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/.ropeproject
 .idea/
 *.swp
 *.swo
 *~
+
+# Keep shared IDE configurations
+!.vscode/extensions.json
+!.vscode/settings.shared.json
 
 # OS generated files
 .DS_Store
