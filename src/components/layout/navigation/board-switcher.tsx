@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronDown, Plus, Search } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -23,17 +24,23 @@ const mockBoards = [
 export function BoardSwitcher() {
   const [searchQuery, setSearchQuery] = useState('')
   const [currentBoard, setCurrentBoard] = useState(mockBoards[0])
+  const [isOpen, setIsOpen] = useState(false)
 
   const filteredBoards = mockBoards.filter(board =>
     board.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="flex items-center space-x-2 px-3">
+        <Button variant="ghost" className="flex items-center space-x-2 px-3 group">
           <span className="font-medium">{currentBoard.name}</span>
-          <ChevronDown className="h-4 w-4" />
+          <motion.div
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ChevronDown className="h-4 w-4" />
+          </motion.div>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-64" align="start">

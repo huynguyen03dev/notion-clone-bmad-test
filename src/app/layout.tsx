@@ -4,6 +4,7 @@ import "./globals.css";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { AppShell } from "@/components/layout/app-shell";
+import { PerformanceConfig } from "@/components/layout/animations/performance-config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,11 +35,13 @@ export default function RootLayout({
           defaultTheme="system"
           storageKey="kanban-ui-theme"
         >
-          <SessionProvider>
-            <AppShell>
-              {children}
-            </AppShell>
-          </SessionProvider>
+          <PerformanceConfig>
+            <SessionProvider>
+              <AppShell>
+                {children}
+              </AppShell>
+            </SessionProvider>
+          </PerformanceConfig>
         </ThemeProvider>
       </body>
     </html>

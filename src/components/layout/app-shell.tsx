@@ -6,6 +6,8 @@ import { DesktopNav } from './navigation/desktop-nav'
 import { MobileNav } from './navigation/mobile-nav'
 import { Footer } from './footer'
 import { AuthGuard } from '@/components/auth/AuthGuard'
+import { PageTransition } from './animations/page-transition'
+import { LoadingSpinner } from './loading/loading-spinner'
 
 interface AppShellProps {
   children: React.ReactNode
@@ -30,7 +32,7 @@ export function AppShell({ children }: AppShellProps) {
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <LoadingSpinner size="lg" text="Loading application..." />
       </div>
     )
   }
@@ -87,9 +89,11 @@ function AppShellContent({ children, session }: AppShellContentProps) {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 pb-16 md:pb-0">
+      <main className="flex-1 pb-16 md:pb-0" id="main-content">
         <div className="container mx-auto px-4 py-6">
-          {children}
+          <PageTransition>
+            {children}
+          </PageTransition>
         </div>
       </main>
 
