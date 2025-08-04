@@ -101,10 +101,10 @@ export function ProfileForm() {
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Profile Settings</CardTitle>
-        <CardDescription>
+    <Card className="w-full max-w-md shadow-lg border-border/50">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold text-center">Profile Settings</CardTitle>
+        <CardDescription className="text-center">
           Update your profile information
         </CardDescription>
       </CardHeader>
@@ -122,7 +122,7 @@ export function ProfileForm() {
               required
             />
             {errors.name && (
-              <p className="text-sm text-red-600">{errors.name}</p>
+              <p className="text-sm text-destructive">{errors.name}</p>
             )}
           </div>
 
@@ -138,7 +138,7 @@ export function ProfileForm() {
               required
             />
             {errors.email && (
-              <p className="text-sm text-red-600">{errors.email}</p>
+              <p className="text-sm text-destructive">{errors.email}</p>
             )}
           </div>
 

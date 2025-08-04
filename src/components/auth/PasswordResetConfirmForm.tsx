@@ -116,7 +116,7 @@ export function PasswordResetConfirmForm({ token }: PasswordResetConfirmFormProp
               required
             />
             {errors.password && (
-              <p className="text-sm text-red-600">{errors.password}</p>
+              <p className="text-sm text-destructive">{errors.password}</p>
             )}
           </div>
 

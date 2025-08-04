@@ -80,7 +80,7 @@ export function UserMenu() {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="flex items-center text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950 cursor-pointer"
+          className="flex items-center text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
           onClick={handleSignOut}
         >
           <LogOut className="mr-2 h-4 w-4" />

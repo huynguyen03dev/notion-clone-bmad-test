@@ -126,7 +126,7 @@ export function PasswordResetForm() {
               required
             />
             {errors.email && (
-              <p className="text-sm text-red-600">{errors.email}</p>
+              <p className="text-sm text-destructive">{errors.email}</p>
             )}
           </div>
 
