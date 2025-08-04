@@ -93,10 +93,10 @@ export function RegisterForm() {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Create Account</CardTitle>
-        <CardDescription>
+    <Card className="w-full max-w-md mx-auto shadow-lg border-border/50">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
+        <CardDescription className="text-center">
           Enter your information to create a new account
         </CardDescription>
       </CardHeader>
@@ -114,7 +114,7 @@ export function RegisterForm() {
               required
             />
             {errors.name && (
-              <p className="text-sm text-red-600">{errors.name}</p>
+              <p className="text-sm text-destructive">{errors.name}</p>
             )}
           </div>
 
@@ -130,7 +130,7 @@ export function RegisterForm() {
               required
             />
             {errors.email && (
-              <p className="text-sm text-red-600">{errors.email}</p>
+              <p className="text-sm text-destructive">{errors.email}</p>
             )}
           </div>
 
@@ -146,7 +146,7 @@ export function RegisterForm() {
               required
             />
             {errors.password && (
-              <p className="text-sm text-red-600">{errors.password}</p>
+              <p className="text-sm text-destructive">{errors.password}</p>
             )}
           </div>
 

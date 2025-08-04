@@ -78,10 +78,10 @@ export function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Sign In</CardTitle>
-        <CardDescription>
+    <Card className="w-full max-w-md mx-auto shadow-lg border-border/50">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
+        <CardDescription className="text-center">
           Enter your email and password to access your account
         </CardDescription>
       </CardHeader>
@@ -99,7 +99,7 @@ export function LoginForm() {
               required
             />
             {errors.email && (
-              <p className="text-sm text-red-600">{errors.email}</p>
+              <p className="text-sm text-destructive">{errors.email}</p>
             )}
           </div>
 
@@ -115,7 +115,7 @@ export function LoginForm() {
               required
             />
             {errors.password && (
-              <p className="text-sm text-red-600">{errors.password}</p>
+              <p className="text-sm text-destructive">{errors.password}</p>
             )}
           </div>
 
@@ -132,7 +132,7 @@ export function LoginForm() {
           <div className="text-center">
             <Link
               href="/forgot-password"
-              className="text-sm text-indigo-600 hover:text-indigo-500"
+              className="text-sm text-primary hover:text-primary/80 transition-colors"
             >
               Forgot your password?
             </Link>
