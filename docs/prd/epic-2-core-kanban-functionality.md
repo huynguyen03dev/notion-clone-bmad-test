@@ -26,7 +26,7 @@ so that I can organize tasks according to my process.
 1. Default columns created (To Do, In Progress, Done) for new boards
 2. Add new column functionality with custom naming
 3. Edit column names with inline editing
-4. Delete columns with task migration options
+4. Delete columns with task migration options (move tasks to selected column, delete all tasks, or cancel deletion)
 5. Reorder columns using drag-and-drop
 6. Column color customization options
 7. Minimum one column requirement enforcement

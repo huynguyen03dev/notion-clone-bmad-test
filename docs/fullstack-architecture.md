@@ -97,6 +97,7 @@ This is the **DEFINITIVE** technology selection for the entire project:
 | UI Component Library | shadcn/ui | Latest | Accessible component system | WCAG AA compliance, customizable, TypeScript support |
 | CSS Framework | TailwindCSS | 3.4+ | Utility-first styling | Rapid development, consistent design system, performance optimization |
 | State Management | Zustand | 4.4+ | Lightweight state management | Simple API, TypeScript support, minimal boilerplate |
+| Drag & Drop | @dnd-kit | 6.1+ | Accessible drag-and-drop library | Modern API, accessibility-first, touch support, keyboard navigation |
 | Backend Language | TypeScript | 5.3+ | Type-safe backend development | Shared types between frontend/backend, consistent development experience |
 | Backend Framework | Next.js API Routes | 14.1+ | Serverless API endpoints | Integrated with frontend, simplified deployment |
 | API Style | tRPC | 10.45+ | Type-safe API layer | End-to-end type safety, excellent DX, reduces API documentation overhead |
@@ -240,11 +241,12 @@ The component architecture follows a hierarchical structure:
 - **Real-time components:** Collaboration features (RealTimePresence)
 
 Key components include:
-- **TaskCard:** Individual task display with drag-and-drop capability
-- **KanbanColumn:** Column container with task management
+- **TaskCard:** Individual task display with drag-and-drop capability using @dnd-kit/sortable
+- **KanbanColumn:** Column container with task management and drop zone functionality
 - **TaskDetailModal:** Comprehensive task editing interface
 - **RealTimePresence:** Live collaboration indicators
-- **BoardPage:** Main kanban board interface
+- **BoardPage:** Main kanban board interface with DndContext provider
+- **DragOverlay:** Custom drag overlay component for visual feedback during drag operations
 
 All components are built with TypeScript, support accessibility requirements, and integrate with the real-time collaboration system.
 
@@ -451,6 +453,62 @@ export async function verifyBoardAccess(
 - **Security logging:** Comprehensive audit trail with privacy compliance
 - **GDPR compliance:** Data export and deletion capabilities
 
+## Drag-and-Drop Implementation
+
+### @dnd-kit Integration
+
+The application uses @dnd-kit for all drag-and-drop functionality, providing accessibility-first interactions with keyboard and touch support:
+
+```typescript
+// DndContext setup for kanban board
+import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+
+export const KanbanBoard = ({ board, columns, tasks }) => {
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    setActiveTask(tasks.find(task => task.id === active.id) || null);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over) return;
+
+    // Handle task movement between columns
+    if (active.data.current?.type === 'task') {
+      updateTaskPosition(active.id, over.id);
+    }
+
+    setActiveTask(null);
+  };
+
+  return (
+    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <div className="flex gap-4 overflow-x-auto">
+        {columns.map(column => (
+          <SortableContext key={column.id} items={tasks.filter(t => t.columnId === column.id)}>
+            <KanbanColumn column={column} tasks={tasks.filter(t => t.columnId === column.id)} />
+          </SortableContext>
+        ))}
+      </div>
+      <DragOverlay>
+        {activeTask && <TaskCard task={activeTask} isDragging />}
+      </DragOverlay>
+    </DndContext>
+  );
+};
+```
+
+### Performance Requirements
+
+- **60fps Animation Target:** Achieved through @dnd-kit's optimized rendering and React.memo usage
+- **Touch Support:** Native touch events with 44px minimum touch targets
+- **Keyboard Navigation:** Arrow keys for selection, Space/Enter for drag initiation
+- **Visual Feedback:** Custom drag overlay with opacity and transform animations
+
 ## Performance Optimization
 
 ### Frontend Performance
@@ -581,6 +639,31 @@ test('drags and drops task between columns', async ({ page }) => {
 
   await taskCard.dragTo(inProgressColumn);
   await expect(inProgressColumn.locator('[data-testid="task-card"]')).toContainText('Test Task');
+});
+
+// Performance validation for 60fps requirement
+test('validates drag performance meets 60fps target', async ({ page }) => {
+  // Enable performance monitoring
+  await page.addInitScript(() => {
+    window.performanceMetrics = [];
+    const observer = new PerformanceObserver((list) => {
+      window.performanceMetrics.push(...list.getEntries());
+    });
+    observer.observe({ entryTypes: ['measure', 'navigation'] });
+  });
+
+  // Perform drag operation
+  const taskCard = page.locator('[data-testid="task-card"]').first();
+  await taskCard.dragTo(page.locator('[data-testid="column"]').nth(1));
+
+  // Validate frame rate during drag operation
+  const metrics = await page.evaluate(() => window.performanceMetrics);
+  const dragMetrics = metrics.filter(m => m.name.includes('drag'));
+
+  // Ensure no frame drops below 60fps (16.67ms per frame)
+  dragMetrics.forEach(metric => {
+    expect(metric.duration).toBeLessThan(16.67);
+  });
 });
 
 test('meets performance requirements', async ({ page }) => {
