@@ -6,6 +6,7 @@ import { Home, Search, User, Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useAccessibleNav } from '@/components/accessibility/aria-utils'
 
 interface MobileNavProps {
   session: any
@@ -13,6 +14,10 @@ interface MobileNavProps {
 
 export function MobileNav({ session }: MobileNavProps) {
   const pathname = usePathname()
+  const { navProps, itemProps } = useAccessibleNav({
+    label: 'Mobile navigation',
+    current: pathname
+  })
 
   if (!session) {
     return null
@@ -47,6 +52,7 @@ export function MobileNav({ session }: MobileNavProps) {
 
   return (
     <motion.nav
+      {...navProps}
       className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t"
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
@@ -72,13 +78,17 @@ export function MobileNav({ session }: MobileNavProps) {
                   item.active && 'text-primary'
                 )}
               >
-                <Link href={item.href}>
+                <Link
+                  href={item.href}
+                  {...itemProps(item.href, item.active)}
+                  aria-label={`${item.label}${item.active ? ' (current page)' : ''}`}
+                >
                   <motion.div
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     className="flex flex-col items-center space-y-1"
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-5 w-5" aria-hidden="true" />
                     <span className="text-xs">{item.label}</span>
                   </motion.div>
                   {item.active && (
@@ -86,6 +96,7 @@ export function MobileNav({ session }: MobileNavProps) {
                       className="absolute -top-1 left-1/2 w-1 h-1 bg-primary rounded-full"
                       layoutId="activeTab"
                       style={{ x: '-50%' }}
+                      aria-hidden="true"
                     />
                   )}
                 </Link>
