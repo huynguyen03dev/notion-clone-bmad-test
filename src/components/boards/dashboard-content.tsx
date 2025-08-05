@@ -9,7 +9,7 @@ import { EmptyState } from './empty-state';
 import { RecentBoards } from './recent-boards';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { BoardWithDetails, BoardFilters } from '@/types/board';
+import { BoardWithDetails } from '@/types/board';
 import { toast } from 'sonner';
 
 export function DashboardContent() {
@@ -19,138 +19,121 @@ export function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [filters, setFilters] = useState<BoardFilters>({
-    search: '',
+  const [currentSearch, setCurrentSearch] = useState('');
+  const [currentSort, setCurrentSort] = useState<{ sortBy: 'name' | 'createdAt' | 'updatedAt'; sortOrder: 'asc' | 'desc' }>({
     sortBy: 'updatedAt',
-    sortOrder: 'desc',
-    limit: 20,
-    offset: 0,
+    sortOrder: 'desc'
   });
-  const [hasLoaded, setHasLoaded] = useState(false);
-  const filtersRef = useRef(filters);
+  const hasLoadedRef = useRef(false);
+  const currentSearchRef = useRef(currentSearch);
+  const currentSortRef = useRef(currentSort);
 
-  // Update ref when filters change
+  // Update refs when state changes
   useEffect(() => {
-    filtersRef.current = filters;
-  }, [filters]);
+    currentSearchRef.current = currentSearch;
+  }, [currentSearch]);
 
-
-
-  // Initial load - only run once when session is available
   useEffect(() => {
-    if (!session?.user?.id || hasLoaded) return;
+    currentSortRef.current = currentSort;
+  }, [currentSort]);
 
-    // Inline the fetch to avoid function reference issues
-    const loadInitialBoards = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  // Fetch boards function - COMPLETELY STABLE with NO dependencies to prevent infinite loops
+  const fetchBoards = useCallback(async (search: string = '', sortBy: 'name' | 'createdAt' | 'updatedAt' = 'updatedAt', sortOrder: 'asc' | 'desc' = 'desc') => {
+    console.log('📡 fetchBoards called with:', { search, sortBy, sortOrder });
 
-        const searchParams = new URLSearchParams({
-          sortBy: 'updatedAt',
-          sortOrder: 'desc',
-          limit: '20',
-          offset: '0',
-        });
+    // CIRCUIT BREAKER: If we've already made a successful API call, NEVER make another one unless it's a search
+    if (circuitBreakerRef.current && !search) {
+      console.log('🚫 CIRCUIT BREAKER: Preventing duplicate API call');
+      return;
+    }
 
-        const response = await fetch(`/api/boards?${searchParams.toString()}`);
+    // Get session directly from hook to avoid dependency
+    const currentSession = session;
+    if (!currentSession?.user?.id) {
+      console.log('❌ No session or user ID, aborting fetchBoards');
+      return;
+    }
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch boards');
-        }
+    try {
+      setLoading(true);
+      setError(null);
 
-        const data = await response.json();
-        setBoards(data.boards);
-        setRecentBoards(data.boards.slice(0, 5));
-        setHasLoaded(true);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-        console.error('Failed to load boards:', err);
-      } finally {
-        setLoading(false);
+      const searchParams = new URLSearchParams();
+      if (search) searchParams.set('search', search);
+      searchParams.set('sortBy', sortBy);
+      searchParams.set('sortOrder', sortOrder);
+      searchParams.set('limit', '20');
+      searchParams.set('offset', '0');
+
+      const response = await fetch(`/api/boards?${searchParams.toString()}`);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch boards');
       }
-    };
 
-    loadInitialBoards();
-  }, [session?.user?.id, hasLoaded]); // Only depend on user ID and hasLoaded
+      const data = await response.json();
+      setBoards(data.boards);
+
+      // Set recent boards (first 5 boards sorted by updatedAt) only if no search
+      if (!search) {
+        setRecentBoards(data.boards.slice(0, 5));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Failed to load boards:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []); // NO DEPENDENCIES - COMPLETELY STABLE
+
+  // CIRCUIT BREAKER - Prevent infinite API calls
+  const circuitBreakerRef = useRef(false);
+
+  // Initial load - run only once when component mounts
+  useEffect(() => {
+    console.log('🔍 Initial load effect triggered, session?.user?.id:', session?.user?.id, 'hasLoadedRef.current:', hasLoadedRef.current, 'circuitBreaker:', circuitBreakerRef.current);
+
+    // CIRCUIT BREAKER: If we've already made a successful API call, NEVER make another one
+    if (circuitBreakerRef.current) {
+      console.log('🚫 CIRCUIT BREAKER: Preventing API call - already made one');
+      return;
+    }
+
+    // Check session inside the effect to avoid dependency
+    if (!session?.user?.id || hasLoadedRef.current) {
+      console.log('❌ Skipping initial load - no session or already loaded');
+      return;
+    }
+
+    console.log('🚀 Running initial fetchBoards');
+    hasLoadedRef.current = true;
+    circuitBreakerRef.current = true; // ACTIVATE CIRCUIT BREAKER
+    fetchBoards();
+  }, []); // NO DEPENDENCIES - run only once on mount
 
 
 
-  // Handle search - use useCallback to create stable reference
+  // Handle search - COMPLETELY STABLE with NO dependencies
   const handleSearch = useCallback(async (search: string) => {
-    const newFilters = { ...filtersRef.current, search, offset: 0 };
-    setFilters(newFilters);
-
-    // Inline fetch to avoid dependency issues
-    try {
-      setLoading(true);
-      setError(null);
-
-      const searchParams = new URLSearchParams();
-      if (newFilters.search) searchParams.set('search', newFilters.search);
-      if (newFilters.sortBy) searchParams.set('sortBy', newFilters.sortBy);
-      if (newFilters.sortOrder) searchParams.set('sortOrder', newFilters.sortOrder);
-      if (newFilters.limit) searchParams.set('limit', newFilters.limit.toString());
-      if (newFilters.offset) searchParams.set('offset', newFilters.offset.toString());
-
-      const response = await fetch(`/api/boards?${searchParams.toString()}`);
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch boards');
-      }
-
-      const data = await response.json();
-      setBoards(data.boards);
-
-      // Set recent boards (first 5 boards sorted by updatedAt)
-      if (!newFilters.search) {
-        setRecentBoards(data.boards.slice(0, 5));
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      toast.error('Failed to load boards');
-    } finally {
-      setLoading(false);
+    // Prevent unnecessary API calls if search hasn't changed
+    if (currentSearchRef.current === search) {
+      return;
     }
-  }, []); // Empty dependencies to create stable reference
 
-  // Handle sort change - use useCallback to create stable reference
+    setCurrentSearch(search);
+    await fetchBoards(search, currentSortRef.current.sortBy, currentSortRef.current.sortOrder);
+  }, []); // NO DEPENDENCIES - COMPLETELY STABLE
+
+  // Handle sort change - COMPLETELY STABLE with NO dependencies
   const handleSortChange = useCallback(async (sortBy: 'name' | 'createdAt' | 'updatedAt', sortOrder: 'asc' | 'desc') => {
-    const newFilters = { ...filtersRef.current, sortBy, sortOrder, offset: 0 };
-    setFilters(newFilters);
-
-    // Inline fetch to avoid dependency issues
-    try {
-      setLoading(true);
-      setError(null);
-
-      const searchParams = new URLSearchParams();
-      if (newFilters.search) searchParams.set('search', newFilters.search);
-      if (newFilters.sortBy) searchParams.set('sortBy', newFilters.sortBy);
-      if (newFilters.sortOrder) searchParams.set('sortOrder', newFilters.sortOrder);
-      if (newFilters.limit) searchParams.set('limit', newFilters.limit.toString());
-      if (newFilters.offset) searchParams.set('offset', newFilters.offset.toString());
-
-      const response = await fetch(`/api/boards?${searchParams.toString()}`);
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch boards');
-      }
-
-      const data = await response.json();
-      setBoards(data.boards);
-
-      // Set recent boards (first 5 boards sorted by updatedAt)
-      if (!newFilters.search) {
-        setRecentBoards(data.boards.slice(0, 5));
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      toast.error('Failed to load boards');
-    } finally {
-      setLoading(false);
+    // Prevent unnecessary API calls if sort hasn't changed
+    if (currentSortRef.current.sortBy === sortBy && currentSortRef.current.sortOrder === sortOrder) {
+      return;
     }
-  }, []); // Empty dependencies to create stable reference
+
+    setCurrentSort({ sortBy, sortOrder });
+    await fetchBoards(currentSearchRef.current, sortBy, sortOrder);
+  }, []); // NO DEPENDENCIES - COMPLETELY STABLE
 
   // Handle board creation
   const handleBoardCreated = (newBoard: BoardWithDetails) => {
@@ -197,10 +180,10 @@ export function DashboardContent() {
     <div className="space-y-8">
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-        <BoardSearch 
+        <BoardSearch
           onSearch={handleSearch}
           onSortChange={handleSortChange}
-          currentSort={{ sortBy: filters.sortBy!, sortOrder: filters.sortOrder! }}
+          currentSort={currentSort}
         />
         <Button onClick={() => setIsCreateModalOpen(true)} className="shrink-0">
           <Plus className="h-4 w-4 mr-2" />
@@ -210,7 +193,7 @@ export function DashboardContent() {
 
       {/* Recent Boards Section */}
       {recentBoards.length > 0 && !filters.search && (
-        <RecentBoards 
+        <RecentBoards
           boards={recentBoards}
           onBoardUpdated={handleBoardUpdated}
           onBoardDeleted={handleBoardDeleted}
@@ -219,14 +202,14 @@ export function DashboardContent() {
 
       {/* Main Boards Grid */}
       {boards.length > 0 ? (
-        <BoardGrid 
+        <BoardGrid
           boards={boards}
           onBoardUpdated={handleBoardUpdated}
           onBoardDeleted={handleBoardDeleted}
           loading={loading}
         />
       ) : (
-        <EmptyState 
+        <EmptyState
           onCreateBoard={() => setIsCreateModalOpen(true)}
           hasSearch={!!filters.search}
         />

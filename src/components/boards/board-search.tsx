@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,6 +29,10 @@ export function BoardSearch({ onSearch, onSortChange, currentSort }: BoardSearch
   const [isInitialMount, setIsInitialMount] = useState(true);
   const [hasUserTyped, setHasUserTyped] = useState(false);
 
+  // Use ref to store the onSearch function to prevent infinite loops
+  const onSearchRef = useRef(onSearch);
+  onSearchRef.current = onSearch;
+
   useEffect(() => {
     if (isInitialMount) {
       setIsInitialMount(false);
@@ -36,9 +40,9 @@ export function BoardSearch({ onSearch, onSortChange, currentSort }: BoardSearch
     }
     // Only trigger search if user has actually typed something
     if (hasUserTyped) {
-      onSearch(debouncedSearch);
+      onSearchRef.current(debouncedSearch);
     }
-  }, [debouncedSearch, hasUserTyped]);
+  }, [debouncedSearch, hasUserTyped]); // Use ref to avoid onSearch dependency
 
   const getSortIcon = () => {
     return currentSort.sortOrder === 'asc' ? SortAsc : SortDesc;
@@ -105,7 +109,7 @@ export function BoardSearch({ onSearch, onSortChange, currentSort }: BoardSearch
           ].map(({ key, label }) => {
             const Icon = getSortFieldIcon(key);
             const isActive = currentSort.sortBy === key;
-            
+
             return (
               <DropdownMenuItem
                 key={key}

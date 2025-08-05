@@ -1,4 +1,5 @@
 import { PrismaClient, TaskPriority, CollaboratorRole } from '@prisma/client'
+import { hashPassword } from '../src/lib/auth-utils'
 
 const prisma = new PrismaClient()
 
@@ -15,35 +16,45 @@ async function main() {
     await prisma.user.deleteMany()
   }
 
-  // Create sample users
+  // Create sample users with passwords
   console.log('👥 Creating users...')
+  const defaultPassword = await hashPassword('password123')
+
   const users = await Promise.all([
     prisma.user.create({
       data: {
         email: 'john.doe@example.com',
         name: 'John Doe',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+        password: defaultPassword,
+        avatar:
+          'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
       },
     }),
     prisma.user.create({
       data: {
         email: 'jane.smith@example.com',
         name: 'Jane Smith',
-        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+        password: defaultPassword,
+        avatar:
+          'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
       },
     }),
     prisma.user.create({
       data: {
         email: 'mike.johnson@example.com',
         name: 'Mike Johnson',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+        password: defaultPassword,
+        avatar:
+          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
       },
     }),
     prisma.user.create({
       data: {
         email: 'sarah.wilson@example.com',
         name: 'Sarah Wilson',
-        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+        password: defaultPassword,
+        avatar:
+          'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
       },
     }),
   ])
@@ -56,7 +67,8 @@ async function main() {
     prisma.board.create({
       data: {
         name: 'Website Redesign Project',
-        description: 'Complete redesign of the company website with modern UI/UX',
+        description:
+          'Complete redesign of the company website with modern UI/UX',
         ownerId: users[0].id,
         isPublic: false,
       },
@@ -208,7 +220,8 @@ async function main() {
     prisma.task.create({
       data: {
         title: 'Design new homepage layout',
-        description: 'Create wireframes and mockups for the new homepage design',
+        description:
+          'Create wireframes and mockups for the new homepage design',
         columnId: websiteColumns[0].id,
         boardId: boards[0].id,
         assigneeId: users[1].id,
@@ -220,7 +233,8 @@ async function main() {
     prisma.task.create({
       data: {
         title: 'Implement responsive navigation',
-        description: 'Build mobile-friendly navigation component with hamburger menu',
+        description:
+          'Build mobile-friendly navigation component with hamburger menu',
         columnId: websiteColumns[1].id,
         boardId: boards[0].id,
         assigneeId: users[2].id,
@@ -231,7 +245,8 @@ async function main() {
     prisma.task.create({
       data: {
         title: 'Optimize page load speed',
-        description: 'Implement lazy loading and optimize images for better performance',
+        description:
+          'Implement lazy loading and optimize images for better performance',
         columnId: websiteColumns[2].id,
         boardId: boards[0].id,
         assigneeId: users[0].id,
@@ -254,7 +269,8 @@ async function main() {
     prisma.task.create({
       data: {
         title: 'User authentication flow',
-        description: 'Design and implement login/signup screens with social auth',
+        description:
+          'Design and implement login/signup screens with social auth',
         columnId: mobileColumns[0].id,
         boardId: boards[1].id,
         assigneeId: users[3].id,
@@ -266,7 +282,8 @@ async function main() {
     prisma.task.create({
       data: {
         title: 'Push notifications setup',
-        description: 'Integrate Firebase Cloud Messaging for push notifications',
+        description:
+          'Integrate Firebase Cloud Messaging for push notifications',
         columnId: mobileColumns[1].id,
         boardId: boards[1].id,
         assigneeId: users[1].id,
