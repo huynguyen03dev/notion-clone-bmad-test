@@ -1,7 +1,44 @@
+'use client'
+
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { LoadingSpinner } from '@/components/layout/loading/loading-spinner'
 
 export default function Home() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (status === 'loading') return // Still loading session
+    
+    if (session) {
+      router.push('/dashboard')
+    }
+  }, [session, status, router])
+
+  // Show loading state while checking authentication
+  if (status === 'loading') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <LoadingSpinner size="lg" text="Loading..." />
+      </div>
+    )
+  }
+
+  // Show loading state while redirecting authenticated users
+  if (session) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <LoadingSpinner size="lg" text="Redirecting to dashboard..." />
+      </div>
+    )
+  }
+
+  // Show landing page only for unauthenticated users
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
       <h1 className="text-4xl font-bold mb-4">Welcome to Kanban Board</h1>
