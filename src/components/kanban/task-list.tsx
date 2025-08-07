@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableTaskCard } from './sortable-task-card';
 import { TaskWithDetails } from '@/types/task';
-import { useTaskApi } from '@/hooks/use-task-api';
+// 🚨 EMERGENCY FIX: Temporarily disable React Query to stop infinite loop
+// import { useColumnTasks, useDeleteTask, useDuplicateTask } from '@/hooks/use-task-data';
 import { Button } from '@/components/ui/button';
 import { Plus, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useState, useEffect, useCallback } from 'react';
 
 interface TaskListProps {
   columnId: string;
@@ -35,95 +36,71 @@ export function TaskList({
   showBulkSelection = false,
 }: TaskListProps) {
   console.log('🔥 TaskList component rendered for column:', columnId);
+
+  // 🚨 EMERGENCY SIMPLE SOLUTION: Basic state management to stop infinite loop
   const [tasks, setTasks] = useState<TaskWithDetails[]>([]);
   const [isLoadingTasks, setIsLoadingTasks] = useState(true);
-  const { deleteTask, duplicateTask, isLoading } = useTaskApi();
+  const [error, setError] = useState<string | null>(null);
 
-  // Circuit breaker to prevent infinite API calls
-  const circuitBreakerRef = useRef<string | null>(null);
-  const hasLoadedRef = useRef(false);
-
-  // Fetch tasks function - COMPLETELY STABLE with NO dependencies to prevent infinite loops
-  const fetchTasks = useCallback(async (columnId: string, boardId: string) => {
-    console.log('📡 fetchTasks called for column:', columnId, 'board:', boardId);
-
-    // CIRCUIT BREAKER: If we've already made a successful API call for this column, NEVER make another one
-    const cacheKey = `${columnId}-${boardId}`;
-    if (circuitBreakerRef.current === cacheKey) {
-      console.log('🚫 CIRCUIT BREAKER: Preventing duplicate API call for column:', columnId);
-      return;
-    }
+  // 🔧 STABLE DATA FETCHING: Only fetch when columnId or boardId changes
+  const fetchTasks = useCallback(async () => {
+    if (!columnId || !boardId) return;
 
     try {
       setIsLoadingTasks(true);
+      setError(null);
 
-      const searchParams = new URLSearchParams();
-      searchParams.append('columnId', columnId);
-      searchParams.append('boardId', boardId);
-      searchParams.append('sortBy', 'position');
-      searchParams.append('sortOrder', 'asc');
-
-      const response = await fetch(`/api/tasks?${searchParams.toString()}`);
+      const response = await fetch(`/api/tasks?columnId=${columnId}&boardId=${boardId}&sortBy=position&sortOrder=asc&limit=100`);
 
       if (!response.ok) {
-        throw new Error('Failed to fetch tasks');
+        throw new Error(`Failed to fetch tasks: ${response.status}`);
       }
 
-      const result = await response.json();
-      setTasks(result.tasks || []);
-
-      // ACTIVATE CIRCUIT BREAKER for this column
-      circuitBreakerRef.current = cacheKey;
-
-    } catch (error) {
-      console.error('Failed to load tasks:', error);
-      setTasks([]);
+      const data = await response.json();
+      setTasks(data.tasks || []);
+      console.log('✅ Simple fetch: Successfully loaded tasks:', data.tasks?.length || 0);
+    } catch (err) {
+      console.error('❌ Simple fetch: Failed to load tasks:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load tasks');
     } finally {
       setIsLoadingTasks(false);
     }
-  }, []); // NO DEPENDENCIES - COMPLETELY STABLE
+  }, [columnId, boardId]);
 
-  // Load tasks for this column - run only once when component mounts or column changes
+  // 🔧 STABLE EFFECT: Only run when dependencies change
   useEffect(() => {
-    console.log('🔍 Task load effect triggered for column:', columnId, 'board:', boardId);
+    fetchTasks();
+  }, [fetchTasks]);
 
-    const cacheKey = `${columnId}-${boardId}`;
-
-    // CIRCUIT BREAKER: If we've already made a successful API call for this column, NEVER make another one
-    if (circuitBreakerRef.current === cacheKey) {
-      console.log('🚫 CIRCUIT BREAKER: Preventing API call - already loaded for column:', columnId);
-      return;
-    }
-
-    // Reset circuit breaker when column changes
-    if (circuitBreakerRef.current && circuitBreakerRef.current !== cacheKey) {
-      console.log('🔄 Column changed, resetting circuit breaker');
-      circuitBreakerRef.current = null;
-      hasLoadedRef.current = false;
-    }
-
-    if (!hasLoadedRef.current || circuitBreakerRef.current !== cacheKey) {
-      console.log('🚀 Running fetchTasks for column:', columnId);
-      hasLoadedRef.current = true;
-      fetchTasks(columnId, boardId);
-    }
-  }, [columnId, boardId, fetchTasks]); // Only depend on columnId and boardId
-
+  // 🚨 SIMPLE HANDLERS: No complex mutations, just basic operations
   const handleTaskDelete = async (taskId: string) => {
-    const success = await deleteTask(taskId);
-    if (success) {
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete task');
+
+      // Simple state update
       setTasks(prev => prev.filter(task => task.id !== taskId));
-      // Only call onTasksUpdated for user actions, not initial loads
-      onTasksUpdated?.();
+      console.log('✅ Simple delete: Task deleted successfully');
+    } catch (error) {
+      console.error('❌ Simple delete: Failed to delete task:', error);
     }
   };
 
   const handleTaskDuplicate = async (taskId: string) => {
-    const duplicatedTask = await duplicateTask(taskId, columnId);
-    if (duplicatedTask) {
-      setTasks(prev => [...prev, duplicatedTask]);
-      // Only call onTasksUpdated for user actions, not initial loads
-      onTasksUpdated?.();
+    try {
+      const response = await fetch(`/api/tasks/${taskId}/duplicate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ columnId, boardId })
+      });
+
+      if (!response.ok) throw new Error('Failed to duplicate task');
+
+      // Refetch tasks to get the new one
+      await fetchTasks();
+      console.log('✅ Simple duplicate: Task duplicated successfully');
+    } catch (error) {
+      console.error('❌ Simple duplicate: Failed to duplicate task:', error);
     }
   };
 
@@ -131,14 +108,11 @@ export function TaskList({
     onAddTask?.(columnId);
   };
 
-  // Function to refresh tasks when needed (e.g., after task creation)
-  const refreshTasks = useCallback(() => {
+  // 🚀 REACT QUERY SOLUTION: Simple refetch instead of complex refresh logic
+  const refreshTasks = () => {
     console.log('🔄 Refreshing tasks for column:', columnId);
-    // Reset circuit breaker to allow refresh
-    circuitBreakerRef.current = null;
-    hasLoadedRef.current = false;
-    fetchTasks(columnId, boardId);
-  }, [columnId, boardId, fetchTasks]);
+    fetchTasks(); // 🔧 FIX: Use fetchTasks instead of refetch
+  };
 
   if (isLoadingTasks) {
     return (
@@ -184,9 +158,9 @@ export function TaskList({
           'h-auto py-3 px-3'
         )}
         onClick={handleAddTask}
-        disabled={isLoading}
+        disabled={isLoadingTasks}
       >
-        {isLoading ? (
+        {isLoadingTasks ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         ) : (
           <Plus className="mr-2 h-4 w-4" />
