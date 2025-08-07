@@ -7,6 +7,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { PerformanceConfig } from "@/components/layout/animations/performance-config";
 import { CollaborationProvider } from "@/components/collaboration/collaboration-provider";
 import { PWAProvider } from "@/components/pwa/pwa-provider";
+import { QueryProvider } from "@/providers/query-provider";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -57,14 +58,16 @@ export default function RootLayout({
         >
           <PerformanceConfig>
             <SessionProvider>
-              <PWAProvider>
-                <CollaborationProvider>
-                  <AppShell>
-                    {children}
-                  </AppShell>
-                  <Toaster />
-                </CollaborationProvider>
-              </PWAProvider>
+              <QueryProvider>
+                <PWAProvider>
+                  <CollaborationProvider>
+                    <AppShell>
+                      {children}
+                    </AppShell>
+                    <Toaster />
+                  </CollaborationProvider>
+                </PWAProvider>
+              </QueryProvider>
             </SessionProvider>
           </PerformanceConfig>
         </ThemeProvider>
