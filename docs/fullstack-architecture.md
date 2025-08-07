@@ -20,9 +20,10 @@ Based on the PRD technical assumptions, this is a **greenfield project** using N
 This starter template aligns perfectly with the PRD requirements and provides a solid foundation for rapid development while maintaining type safety across the fullstack.
 
 ### Change Log
-| Date | Version | Description | Author |
-|------|---------|-------------|---------|
-| 2025-01-03 | 1.0 | Initial fullstack architecture creation | Architect |
+
+| Date       | Version | Description                             | Author    |
+| ---------- | ------- | --------------------------------------- | --------- |
+| 2025-01-03 | 1.0     | Initial fullstack architecture creation | Architect |
 
 ## High Level Architecture
 
@@ -54,23 +55,23 @@ graph TD
     B --> C[Next.js Application]
     C --> D[API Routes]
     C --> E[React Components]
-    
+
     D --> F[WebSocket Server]
     D --> G[PostgreSQL Database]
     D --> H[Redis Cache]
-    
+
     F --> I[Real-time Collaboration]
     I --> A
-    
+
     E --> J[shadcn/ui Components]
     E --> K[TailwindCSS Styles]
-    
+
     G --> L[Prisma ORM]
-    
+
     M[Docker Container] --> C
     M --> G
     M --> H
-    
+
     style A fill:#e1f5fe
     style C fill:#f3e5f5
     style G fill:#e8f5e8
@@ -85,148 +86,288 @@ graph TD
 - **Repository Pattern:** Abstract data access through Prisma ORM
 - **Real-time Event Pattern:** WebSocket integration for live collaboration
 - **Optimistic UI Pattern:** Immediate UI updates with server reconciliation
+- **Hybrid State Management:** React Query for server state, Zustand for client state
+- **Query-First Data Pattern:** React Query hooks for all server data operations
 
 ## Tech Stack
 
 This is the **DEFINITIVE** technology selection for the entire project:
 
-| Category | Technology | Version | Purpose | Rationale |
-|----------|------------|---------|---------|-----------|
-| Frontend Language | TypeScript | 5.3+ | Type-safe frontend development | Prevents runtime errors, improves developer experience |
-| Frontend Framework | Next.js | 14.1+ | React-based fullstack framework | App Router for performance, built-in API routes, SSR/SSG capabilities |
-| UI Component Library | shadcn/ui | Latest | Accessible component system | WCAG AA compliance, customizable, TypeScript support |
-| CSS Framework | TailwindCSS | 3.4+ | Utility-first styling | Rapid development, consistent design system, performance optimization |
-| State Management | Zustand | 4.4+ | Lightweight state management | Simple API, TypeScript support, minimal boilerplate |
-| Drag & Drop | @dnd-kit | 6.1+ | Accessible drag-and-drop library | Modern API, accessibility-first, touch support, keyboard navigation |
-| Backend Language | TypeScript | 5.3+ | Type-safe backend development | Shared types between frontend/backend, consistent development experience |
-| Backend Framework | Next.js API Routes | 14.1+ | Serverless API endpoints | Integrated with frontend, simplified deployment |
-| API Style | tRPC | 10.45+ | Type-safe API layer | End-to-end type safety, excellent DX, reduces API documentation overhead |
-| Database | PostgreSQL | 15+ | Primary data storage | ACID compliance, JSON support, excellent performance |
-| ORM | Prisma | 5.8+ | Type-safe database access | Schema management, migrations, TypeScript integration |
-| Cache | Redis | 7.2+ | Session and application cache | Real-time collaboration state, session storage, performance optimization |
-| Authentication | NextAuth.js | 4.24+ | Authentication framework | OAuth providers, session management, security best practices |
-| Real-time | Socket.IO | 4.7+ | WebSocket communication | Real-time collaboration, fallback support, room management |
-| Frontend Testing | Vitest + React Testing Library | 1.2+ / 14+ | Component and unit testing | Fast execution, Jest compatibility, React-specific utilities |
-| Backend Testing | Vitest + Supertest | 1.2+ / 6.3+ | API and integration testing | Consistent testing framework, HTTP endpoint testing |
-| E2E Testing | Playwright | 1.40+ | End-to-end testing | Cross-browser testing, real user scenarios, CI/CD integration |
-| Build Tool | Turborepo | 1.11+ | Monorepo build system | Incremental builds, caching, parallel execution |
-| Package Manager | pnpm | 8.14+ | Dependency management | Efficient disk usage, fast installs, monorepo support |
-| IaC Tool | Docker Compose | 2.24+ | Infrastructure as code | Self-hosting deployment, development environment consistency |
-| CI/CD | GitHub Actions | Latest | Continuous integration | Free for public repos, excellent Next.js integration |
-| Monitoring | Sentry | Latest | Error tracking and performance | Real user monitoring, performance insights, error alerting |
+| Category                | Technology                     | Version     | Purpose                          | Rationale                                                                  |
+| ----------------------- | ------------------------------ | ----------- | -------------------------------- | -------------------------------------------------------------------------- |
+| Frontend Language       | TypeScript                     | 5.3+        | Type-safe frontend development   | Prevents runtime errors, improves developer experience                     |
+| Frontend Framework      | Next.js                        | 14.1+       | React-based fullstack framework  | App Router for performance, built-in API routes, SSR/SSG capabilities      |
+| UI Component Library    | shadcn/ui                      | Latest      | Accessible component system      | WCAG AA compliance, customizable, TypeScript support                       |
+| CSS Framework           | TailwindCSS                    | 3.4+        | Utility-first styling            | Rapid development, consistent design system, performance optimization      |
+| Data Fetching           | @tanstack/react-query          | 5.62+       | Server state management          | Advanced caching, background updates, optimistic UI, request deduplication |
+| Client State Management | Zustand                        | 4.4+        | Local state management           | Simple API, TypeScript support, minimal boilerplate for UI state           |
+| Drag & Drop             | @dnd-kit                       | 6.1+        | Accessible drag-and-drop library | Modern API, accessibility-first, touch support, keyboard navigation        |
+| Backend Language        | TypeScript                     | 5.3+        | Type-safe backend development    | Shared types between frontend/backend, consistent development experience   |
+| Backend Framework       | Next.js API Routes             | 14.1+       | Serverless API endpoints         | Integrated with frontend, simplified deployment                            |
+| API Style               | tRPC                           | 10.45+      | Type-safe API layer              | End-to-end type safety, excellent DX, reduces API documentation overhead   |
+| Database                | PostgreSQL                     | 15+         | Primary data storage             | ACID compliance, JSON support, excellent performance                       |
+| ORM                     | Prisma                         | 5.8+        | Type-safe database access        | Schema management, migrations, TypeScript integration                      |
+| Cache                   | Redis                          | 7.2+        | Session and application cache    | Real-time collaboration state, session storage, performance optimization   |
+| Authentication          | NextAuth.js                    | 4.24+       | Authentication framework         | OAuth providers, session management, security best practices               |
+| Real-time               | Socket.IO                      | 4.7+        | WebSocket communication          | Real-time collaboration, fallback support, room management                 |
+| Frontend Testing        | Vitest + React Testing Library | 1.2+ / 14+  | Component and unit testing       | Fast execution, Jest compatibility, React-specific utilities               |
+| Backend Testing         | Vitest + Supertest             | 1.2+ / 6.3+ | API and integration testing      | Consistent testing framework, HTTP endpoint testing                        |
+| E2E Testing             | Playwright                     | 1.40+       | End-to-end testing               | Cross-browser testing, real user scenarios, CI/CD integration              |
+| Build Tool              | Turborepo                      | 1.11+       | Monorepo build system            | Incremental builds, caching, parallel execution                            |
+| Package Manager         | pnpm                           | 8.14+       | Dependency management            | Efficient disk usage, fast installs, monorepo support                      |
+| IaC Tool                | Docker Compose                 | 2.24+       | Infrastructure as code           | Self-hosting deployment, development environment consistency               |
+| CI/CD                   | GitHub Actions                 | Latest      | Continuous integration           | Free for public repos, excellent Next.js integration                       |
+| Monitoring              | Sentry                         | Latest      | Error tracking and performance   | Real user monitoring, performance insights, error alerting                 |
+
+## State Management Architecture
+
+The application employs a **hybrid state management approach** that separates server state from client state for optimal performance and developer experience:
+
+### Server State Management (React Query)
+
+**Purpose:** Manages all data that originates from the server (boards, tasks, columns, user data)
+
+**Key Features:**
+
+- **Intelligent Caching:** 5-minute stale time, 10-minute garbage collection
+- **Background Synchronization:** Automatic data freshness without user intervention
+- **Optimistic Updates:** Immediate UI feedback with server reconciliation
+- **Request Deduplication:** Prevents duplicate API calls for the same data
+- **Query Invalidation:** Precise cache updates for real-time collaboration
+
+**Implementation Pattern:**
+
+```typescript
+// Query keys for cache management
+export const taskKeys = {
+  all: ['tasks'] as const,
+  lists: () => [...taskKeys.all, 'list'] as const,
+  list: (params: TasksParams) => [...taskKeys.lists(), params] as const,
+  details: () => [...taskKeys.all, 'detail'] as const,
+  detail: (id: string) => [...taskKeys.details(), id] as const,
+}
+
+// Custom hooks for data operations
+export function useTasksByColumn(columnId: string, boardId: string) {
+  return useQuery({
+    queryKey: taskKeys.list({ columnId, boardId }),
+    queryFn: () => fetchTasksByColumn(columnId, boardId),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  })
+}
+```
+
+### Client State Management (Zustand)
+
+**Purpose:** Manages local UI state, user preferences, and temporary application state
+
+**Key Features:**
+
+- **Lightweight:** Minimal boilerplate for simple state operations
+- **TypeScript Integration:** Full type safety for state operations
+- **Devtools Support:** Redux DevTools integration for debugging
+- **Persistence:** Local storage integration for user preferences
+
+**Use Cases:**
+
+- UI state (modals, sidebars, theme preferences)
+- Form state (temporary, unsaved data)
+- User interface preferences (column widths, view modes)
+- Real-time collaboration state (user presence, cursors)
+
+### Integration Benefits
+
+This hybrid approach provides:
+
+- **Clear Separation of Concerns:** Server data vs. UI state
+- **Optimal Performance:** Intelligent caching for server data, immediate updates for UI state
+- **Developer Experience:** Type-safe operations across both state types
+- **Scalability:** Independent optimization of server and client state strategies
 
 ## Data Models
 
 ### Core Data Entities
 
 #### User Model
+
 ```typescript
 interface User {
-  id: string;
-  email: string;
-  name: string;
-  avatar?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  id: string
+  email: string
+  name: string
+  avatar?: string | null
+  createdAt: Date
+  updatedAt: Date
 }
 ```
 
 #### Board Model
+
 ```typescript
 interface Board {
-  id: string;
-  name: string;
-  description?: string | null;
-  ownerId: string;
-  isPublic: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  
+  id: string
+  name: string
+  description?: string | null
+  ownerId: string
+  isPublic: boolean
+  createdAt: Date
+  updatedAt: Date
+
   // Relations
-  owner: User;
-  columns: Column[];
-  collaborators: BoardCollaborator[];
-  tasks: Task[];
+  owner: User
+  columns: Column[]
+  collaborators: BoardCollaborator[]
+  tasks: Task[]
 }
 ```
 
 #### Column Model
+
 ```typescript
 interface Column {
-  id: string;
-  name: string;
-  boardId: string;
-  position: number;
-  color?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  
+  id: string
+  name: string
+  boardId: string
+  position: number
+  color?: string | null
+  createdAt: Date
+  updatedAt: Date
+
   // Relations
-  board: Board;
-  tasks: Task[];
+  board: Board
+  tasks: Task[]
 }
 ```
 
 #### Task Model
+
 ```typescript
 enum TaskPriority {
   LOW = 'LOW',
   MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH'
+  HIGH = 'HIGH',
 }
 
 interface Task {
-  id: string;
-  title: string;
-  description?: string | null;
-  columnId: string;
-  boardId: string;
-  assigneeId?: string | null;
-  priority: TaskPriority;
-  dueDate?: Date | null;
-  position: number;
-  createdAt: Date;
-  updatedAt: Date;
-  
+  id: string
+  title: string
+  description?: string | null
+  columnId: string
+  boardId: string
+  assigneeId?: string | null
+  priority: TaskPriority
+  dueDate?: Date | null
+  position: number
+  createdAt: Date
+  updatedAt: Date
+
   // Relations
-  column: Column;
-  board: Board;
-  assignee?: User | null;
+  column: Column
+  board: Board
+  assignee?: User | null
 }
 ```
 
 #### BoardCollaborator Model
+
 ```typescript
 enum CollaboratorRole {
   VIEWER = 'VIEWER',
   EDITOR = 'EDITOR',
-  ADMIN = 'ADMIN'
+  ADMIN = 'ADMIN',
 }
 
 interface BoardCollaborator {
-  id: string;
-  boardId: string;
-  userId: string;
-  role: CollaboratorRole;
-  invitedAt: Date;
-  joinedAt?: Date | null;
-  
+  id: string
+  boardId: string
+  userId: string
+  role: CollaboratorRole
+  invitedAt: Date
+  joinedAt?: Date | null
+
   // Relations
-  board: Board;
-  user: User;
+  board: Board
+  user: User
 }
 ```
 
 ## API Specification
 
-The application uses tRPC for type-safe API communication with the following main routers:
+The application uses a **hybrid API approach** combining Next.js API routes with React Query for optimal type safety and performance:
 
-- **auth:** Authentication and session management
-- **user:** User profile management
-- **board:** Board CRUD operations and access control
-- **column:** Column management within boards
-- **task:** Task operations including creation, updates, and movement
-- **collaboration:** Board sharing and permission management
+### API Architecture
+
+**Backend:** Next.js API routes provide RESTful endpoints with TypeScript interfaces
+**Frontend:** React Query manages server state with intelligent caching and synchronization
+**Type Safety:** Shared TypeScript interfaces ensure end-to-end type safety
+
+### API Routers and Endpoints
+
+- **auth:** Authentication and session management (`/api/auth/*`)
+- **user:** User profile management (`/api/users/*`)
+- **board:** Board CRUD operations and access control (`/api/boards/*`)
+- **column:** Column management within boards (`/api/columns/*`)
+- **task:** Task operations including creation, updates, and movement (`/api/tasks/*`)
+- **collaboration:** Board sharing and permission management (`/api/boards/*/share`)
+
+### React Query Integration Patterns
+
+**Query Key Strategy:**
+
+```typescript
+// Hierarchical query keys for precise cache invalidation
+export const boardKeys = {
+  all: ['boards'] as const,
+  lists: () => [...boardKeys.all, 'list'] as const,
+  list: (params: BoardsParams) => [...boardKeys.lists(), params] as const,
+  details: () => [...boardKeys.all, 'detail'] as const,
+  detail: (id: string) => [...boardKeys.details(), id] as const,
+  columns: (id: string) => [...boardKeys.detail(id), 'columns'] as const,
+}
+```
+
+**Optimistic Updates:**
+
+```typescript
+// Immediate UI feedback with server reconciliation
+export function useUpdateTask() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: updateTask,
+    onMutate: async (newTask) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: taskKeys.detail(newTask.id) })
+
+      // Snapshot previous value
+      const previousTask = queryClient.getQueryData(taskKeys.detail(newTask.id))
+
+      // Optimistically update cache
+      queryClient.setQueryData(taskKeys.detail(newTask.id), newTask)
+
+      return { previousTask }
+    },
+    onError: (err, newTask, context) => {
+      // Rollback on error
+      queryClient.setQueryData(
+        taskKeys.detail(newTask.id),
+        context?.previousTask
+      )
+    },
+    onSettled: () => {
+      // Always refetch after error or success
+      queryClient.invalidateQueries({ queryKey: taskKeys.lists() })
+    },
+  })
+}
+```
+
+**Cache Invalidation Strategy:**
+
+- **Precise Updates:** Target specific query keys for minimal re-fetching
+- **Cascade Invalidation:** Board updates invalidate related columns and tasks
+- **Real-time Sync:** WebSocket events trigger selective cache updates
 
 All API endpoints include proper authentication, authorization, and input validation using Zod schemas.
 
@@ -234,21 +375,108 @@ All API endpoints include proper authentication, authorization, and input valida
 
 ### Component Architecture Overview
 
-The component architecture follows a hierarchical structure:
+The component architecture follows a hierarchical structure with React Query integration:
+
+- **Provider Layer:** QueryProvider wraps the application for React Query context
 - **shadcn/ui foundation:** Accessible base components
 - **Business components:** Kanban-specific functionality (TaskCard, KanbanColumn, TaskDetailModal)
 - **Page components:** User flow orchestration (BoardPage, Dashboard)
 - **Real-time components:** Collaboration features (RealTimePresence)
 
-Key components include:
-- **TaskCard:** Individual task display with drag-and-drop capability using @dnd-kit/sortable
-- **KanbanColumn:** Column container with task management and drop zone functionality
-- **TaskDetailModal:** Comprehensive task editing interface
+### React Query Provider Setup
+
+The application root is wrapped with QueryProvider for global state management:
+
+```typescript
+// src/providers/query-provider.tsx
+export function QueryProvider({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            refetchOnWindowFocus: false,
+            staleTime: 5 * 60 * 1000, // 5 minutes
+            gcTime: 10 * 60 * 1000, // 10 minutes
+            retry: 3,
+            retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+          },
+        },
+      })
+  )
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+      {process.env.NODE_ENV === 'development' && (
+        <ReactQueryDevtools initialIsOpen={false} />
+      )}
+    </QueryClientProvider>
+  )
+}
+
+// app/layout.tsx
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <QueryProvider>
+          <SessionProvider>
+            {children}
+          </SessionProvider>
+        </QueryProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+### Key Components with React Query Integration
+
+- **TaskCard:** Individual task display with optimistic updates via useUpdateTask hook
+- **KanbanColumn:** Column container using useTasksByColumn for real-time data
+- **TaskDetailModal:** Comprehensive task editing with useMutation hooks
 - **RealTimePresence:** Live collaboration indicators
-- **BoardPage:** Main kanban board interface with DndContext provider
+- **BoardPage:** Main kanban board interface with useBoard and useBoardColumns hooks
 - **DragOverlay:** Custom drag overlay component for visual feedback during drag operations
 
-All components are built with TypeScript, support accessibility requirements, and integrate with the real-time collaboration system.
+### Data Fetching Patterns
+
+Components use custom React Query hooks for consistent data management:
+
+```typescript
+// Component example with React Query integration
+export function KanbanColumn({ columnId, boardId }: KanbanColumnProps) {
+  const { data: tasks, isLoading, error } = useTasksByColumn(columnId, boardId)
+  const updateTask = useUpdateTask()
+  const createTask = useCreateTask()
+
+  const handleTaskUpdate = useCallback((taskData: TaskUpdateData) => {
+    updateTask.mutate(taskData, {
+      onSuccess: () => {
+        // Optimistic update already handled by React Query
+        toast.success('Task updated successfully')
+      },
+      onError: (error) => {
+        toast.error('Failed to update task')
+      },
+    })
+  }, [updateTask])
+
+  if (isLoading) return <ColumnSkeleton />
+  if (error) return <ErrorBoundary error={error} />
+
+  return (
+    <div className="kanban-column">
+      {tasks?.map((task) => (
+        <TaskCard key={task.id} task={task} onUpdate={handleTaskUpdate} />
+      ))}
+    </div>
+  )
+}
+```
+
+All components are built with TypeScript, support accessibility requirements, and integrate with the real-time collaboration system through React Query's intelligent caching and synchronization.
 
 ## Database Schema
 
@@ -354,34 +582,40 @@ Socket.IO server with comprehensive real-time collaboration features:
 ```typescript
 // Real-time event handling with authentication and permissions
 io.use(async (socket, next) => {
-  const session = await getServerSession(socket.request, {}, authOptions);
-  if (!session?.user) return next(new Error('Authentication error'));
-  socket.data.user = session.user;
-  next();
-});
+  const session = await getServerSession(socket.request, {}, authOptions)
+  if (!session?.user) return next(new Error('Authentication error'))
+  socket.data.user = session.user
+  next()
+})
 
 // Board room management with presence tracking
 socket.on('join-board', async (data: { boardId: string }) => {
-  const hasAccess = await verifyBoardAccess(socket.data.user.id, data.boardId);
-  if (!hasAccess) return socket.emit('error', { message: 'Access denied' });
+  const hasAccess = await verifyBoardAccess(socket.data.user.id, data.boardId)
+  if (!hasAccess) return socket.emit('error', { message: 'Access denied' })
 
-  socket.join(`board:${data.boardId}`);
-  await addUserPresence(data.boardId, socket.data.user);
-  socket.to(`board:${data.boardId}`).emit('user-joined', { user: socket.data.user });
-});
+  socket.join(`board:${data.boardId}`)
+  await addUserPresence(data.boardId, socket.data.user)
+  socket
+    .to(`board:${data.boardId}`)
+    .emit('user-joined', { user: socket.data.user })
+})
 
 // Optimized real-time updates with batching
 socket.on('task-moved', async (data: TaskMovedEvent) => {
-  const boardId = socket.data.currentBoard;
-  const canEdit = await verifyBoardPermission(socket.data.user.id, boardId, 'EDITOR');
-  if (!canEdit) return;
+  const boardId = socket.data.currentBoard
+  const canEdit = await verifyBoardPermission(
+    socket.data.user.id,
+    boardId,
+    'EDITOR'
+  )
+  if (!canEdit) return
 
   socket.to(`board:${boardId}`).emit('task-moved', {
     ...data,
     user: socket.data.user,
     timestamp: new Date(),
-  });
-});
+  })
+})
 ```
 
 ### Performance Features
@@ -403,10 +637,10 @@ export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       async authorize(credentials) {
-        const { email, password } = loginSchema.parse(credentials);
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (!user || !await compare(password, user.password)) return null;
-        return { id: user.id, email: user.email, name: user.name };
+        const { email, password } = loginSchema.parse(credentials)
+        const user = await prisma.user.findUnique({ where: { email } })
+        if (!user || !(await compare(password, user.password))) return null
+        return { id: user.id, email: user.email, name: user.name }
       },
     }),
     GoogleProvider({ clientId: process.env.GOOGLE_CLIENT_ID! }),
@@ -416,15 +650,15 @@ export const authOptions: NextAuthOptions = {
   // Security callbacks and session management
   callbacks: {
     async jwt({ token, user }) {
-      if (user) token.id = user.id;
-      return token;
+      if (user) token.id = user.id
+      return token
     },
     async session({ session, token }) {
-      session.user.id = token.id as string;
-      return session;
+      session.user.id = token.id as string
+      return session
     },
   },
-};
+}
 
 // Role-based access control with permission hierarchy
 export async function verifyBoardAccess(
@@ -437,12 +671,18 @@ export async function verifyBoardAccess(
       id: boardId,
       OR: [
         { ownerId: userId },
-        { collaborators: { some: { userId, role: { in: getRoleHierarchy(requiredRole) } } } },
-        ...(requiredRole === CollaboratorRole.VIEWER ? [{ isPublic: true }] : []),
+        {
+          collaborators: {
+            some: { userId, role: { in: getRoleHierarchy(requiredRole) } },
+          },
+        },
+        ...(requiredRole === CollaboratorRole.VIEWER
+          ? [{ isPublic: true }]
+          : []),
       ],
     },
-  });
-  return !!board;
+  })
+  return !!board
 }
 ```
 
@@ -511,6 +751,54 @@ export const KanbanBoard = ({ board, columns, tasks }) => {
 
 ## Performance Optimization
 
+### React Query Caching Strategy
+
+Multi-level intelligent caching for optimal data fetching performance:
+
+```typescript
+// QueryClient configuration for optimal performance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Cache data for 5 minutes before considering it stale
+      staleTime: 5 * 60 * 1000,
+      // Keep data in cache for 10 minutes after last use
+      gcTime: 10 * 60 * 1000,
+      // Retry failed requests with exponential backoff
+      retry: 3,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      // Prevent automatic refetching to avoid infinite loops
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    },
+  },
+})
+
+// Performance-optimized query patterns
+export function useTasksByColumn(columnId: string, boardId: string) {
+  return useQuery({
+    queryKey: taskKeys.list({ columnId, boardId }),
+    queryFn: () => fetchTasksByColumn(columnId, boardId),
+    // Extended cache times for frequently accessed data
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    // Disable aggressive refetching for performance
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchInterval: false,
+  })
+}
+```
+
+**Performance Benefits:**
+
+- **Request Deduplication:** Multiple components requesting same data result in single API call
+- **Background Updates:** Data refreshes automatically without blocking UI
+- **Intelligent Refetching:** Only refetch when data is actually stale
+- **Memory Management:** Automatic garbage collection of unused cache entries
+- **Optimistic Updates:** Immediate UI feedback with server reconciliation
+
 ### Frontend Performance
 
 React optimization with memoization, virtual scrolling, and lazy loading:
@@ -551,36 +839,39 @@ Multi-level caching with Redis and optimized database queries:
 ```typescript
 // Multi-level caching: Memory → Redis → Database
 export class CacheManager {
-  static async get<T>(key: string, fallback?: () => Promise<T>): Promise<T | null> {
+  static async get<T>(
+    key: string,
+    fallback?: () => Promise<T>
+  ): Promise<T | null> {
     // Level 1: Memory cache
-    const memoryResult = memoryCache.get(key);
-    if (memoryResult !== undefined) return memoryResult;
+    const memoryResult = memoryCache.get(key)
+    if (memoryResult !== undefined) return memoryResult
 
     // Level 2: Redis cache
-    const redisResult = await redis.get(key);
+    const redisResult = await redis.get(key)
     if (redisResult) {
-      const parsed = JSON.parse(redisResult);
-      memoryCache.set(key, parsed);
-      return parsed;
+      const parsed = JSON.parse(redisResult)
+      memoryCache.set(key, parsed)
+      return parsed
     }
 
     // Level 3: Database fallback
     if (fallback) {
-      const result = await fallback();
-      if (result !== null) await CacheManager.set(key, result, 300);
-      return result;
+      const result = await fallback()
+      if (result !== null) await CacheManager.set(key, result, 300)
+      return result
     }
-    return null;
+    return null
   }
 }
 ```
 
 ### Performance Targets
 
-- **<2s load times:** Achieved through SSR, caching, and bundle optimization
-- **<500ms interactions:** Optimistic updates and efficient state management
-- **60fps animations:** Hardware acceleration and optimized rendering
-- **100+ concurrent users:** Connection pooling and horizontal scaling
+- **<2s load times:** Achieved through SSR, React Query caching, and bundle optimization
+- **<500ms interactions:** React Query optimistic updates and intelligent cache management
+- **60fps animations:** Hardware acceleration and optimized rendering with minimal re-renders
+- **100+ concurrent users:** Connection pooling, React Query request deduplication, and horizontal scaling
 
 ## Testing Strategy
 
@@ -634,46 +925,50 @@ Playwright tests for complete user workflows and performance validation:
 ```typescript
 // E2E tests with performance requirements
 test('drags and drops task between columns', async ({ page }) => {
-  const taskCard = page.locator('[data-testid="task-card"]:has-text("Test Task")');
-  const inProgressColumn = page.locator('[data-testid="column-in-progress"]');
+  const taskCard = page.locator(
+    '[data-testid="task-card"]:has-text("Test Task")'
+  )
+  const inProgressColumn = page.locator('[data-testid="column-in-progress"]')
 
-  await taskCard.dragTo(inProgressColumn);
-  await expect(inProgressColumn.locator('[data-testid="task-card"]')).toContainText('Test Task');
-});
+  await taskCard.dragTo(inProgressColumn)
+  await expect(
+    inProgressColumn.locator('[data-testid="task-card"]')
+  ).toContainText('Test Task')
+})
 
 // Performance validation for 60fps requirement
 test('validates drag performance meets 60fps target', async ({ page }) => {
   // Enable performance monitoring
   await page.addInitScript(() => {
-    window.performanceMetrics = [];
+    window.performanceMetrics = []
     const observer = new PerformanceObserver((list) => {
-      window.performanceMetrics.push(...list.getEntries());
-    });
-    observer.observe({ entryTypes: ['measure', 'navigation'] });
-  });
+      window.performanceMetrics.push(...list.getEntries())
+    })
+    observer.observe({ entryTypes: ['measure', 'navigation'] })
+  })
 
   // Perform drag operation
-  const taskCard = page.locator('[data-testid="task-card"]').first();
-  await taskCard.dragTo(page.locator('[data-testid="column"]').nth(1));
+  const taskCard = page.locator('[data-testid="task-card"]').first()
+  await taskCard.dragTo(page.locator('[data-testid="column"]').nth(1))
 
   // Validate frame rate during drag operation
-  const metrics = await page.evaluate(() => window.performanceMetrics);
-  const dragMetrics = metrics.filter(m => m.name.includes('drag'));
+  const metrics = await page.evaluate(() => window.performanceMetrics)
+  const dragMetrics = metrics.filter((m) => m.name.includes('drag'))
 
   // Ensure no frame drops below 60fps (16.67ms per frame)
-  dragMetrics.forEach(metric => {
-    expect(metric.duration).toBeLessThan(16.67);
-  });
-});
+  dragMetrics.forEach((metric) => {
+    expect(metric.duration).toBeLessThan(16.67)
+  })
+})
 
 test('meets performance requirements', async ({ page }) => {
-  const startTime = Date.now();
-  await page.goto('/board/test-board-id');
-  await page.waitForSelector('[data-testid="kanban-board"]');
-  const loadTime = Date.now() - startTime;
+  const startTime = Date.now()
+  await page.goto('/board/test-board-id')
+  await page.waitForSelector('[data-testid="kanban-board"]')
+  const loadTime = Date.now() - startTime
 
-  expect(loadTime).toBeLessThan(2000); // <2s load time requirement
-});
+  expect(loadTime).toBeLessThan(2000) // <2s load time requirement
+})
 ```
 
 ### Testing Coverage
@@ -745,7 +1040,7 @@ version: '3.8'
 services:
   app:
     build: .
-    ports: ["3000:3000"]
+    ports: ['3000:3000']
     environment:
       - DATABASE_URL=postgresql://kanban:kanban_password@postgres:5432/kanban_db
       - REDIS_URL=redis://redis:6379
@@ -765,7 +1060,7 @@ services:
     volumes: [postgres_data:/var/lib/postgresql/data]
     networks: [kanban-network]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kanban -d kanban_db"]
+      test: ['CMD-SHELL', 'pg_isready -U kanban -d kanban_db']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -775,12 +1070,12 @@ services:
     volumes: [redis_data:/data]
     networks: [kanban-network]
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
 
   nginx:
     image: nginx:alpine
-    ports: ["80:80", "443:443"]
+    ports: ['80:80', '443:443']
     volumes:
       - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./config/ssl:/etc/nginx/ssl:ro
@@ -968,11 +1263,11 @@ export class PerformanceMonitor {
     operation: () => Promise<T>,
     labels?: Record<string, string>
   ): Promise<T> {
-    const start = performance.now();
+    const start = performance.now()
 
     try {
-      const result = await operation();
-      const duration = performance.now() - start;
+      const result = await operation()
+      const duration = performance.now() - start
 
       this.recordMetric({
         name,
@@ -980,26 +1275,26 @@ export class PerformanceMonitor {
         unit: 'ms',
         timestamp: new Date(),
         labels: { ...labels, status: 'success' },
-      });
+      })
 
-      return result;
+      return result
     } catch (error) {
-      const duration = performance.now() - start;
+      const duration = performance.now() - start
       this.recordMetric({
         name,
         value: duration,
         unit: 'ms',
         timestamp: new Date(),
         labels: { ...labels, status: 'error' },
-      });
-      throw error;
+      })
+      throw error
     }
   }
 
   private static recordMetric(metric: PerformanceMetric) {
     // Send to monitoring service (Sentry, DataDog, etc.)
     if (process.env.NODE_ENV === 'production') {
-      this.sendToMonitoring(metric);
+      this.sendToMonitoring(metric)
     }
   }
 }
@@ -1007,15 +1302,15 @@ export class PerformanceMonitor {
 // Automatic API performance monitoring
 export function withPerformanceMonitoring(handler: Function) {
   return async (req: NextRequest): Promise<NextResponse> => {
-    const route = req.nextUrl.pathname;
-    const method = req.method;
+    const route = req.nextUrl.pathname
+    const method = req.method
 
     return PerformanceMonitor.measureAsync(
       'api_request_duration',
       () => handler(req),
       { route, method }
-    );
-  };
+    )
+  }
 }
 ```
 
@@ -1025,7 +1320,7 @@ Winston-based logging system with structured JSON output:
 
 ```typescript
 // lib/monitoring/logger.ts
-import winston from 'winston';
+import winston from 'winston'
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -1041,16 +1336,30 @@ const logger = winston.createLogger({
   },
   transports: [
     new winston.transports.Console(),
-    ...(process.env.NODE_ENV === 'production' ? [
-      new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-      new winston.transports.File({ filename: 'logs/combined.log' }),
-    ] : []),
+    ...(process.env.NODE_ENV === 'production'
+      ? [
+          new winston.transports.File({
+            filename: 'logs/error.log',
+            level: 'error',
+          }),
+          new winston.transports.File({ filename: 'logs/combined.log' }),
+        ]
+      : []),
   ],
-});
+})
 
 export const loggers = {
-  userActivity: (userId: string, action: string, metadata?: Record<string, any>) => {
-    logger.info('User activity', { category: 'user_activity', userId, action, ...metadata });
+  userActivity: (
+    userId: string,
+    action: string,
+    metadata?: Record<string, any>
+  ) => {
+    logger.info('User activity', {
+      category: 'user_activity',
+      userId,
+      action,
+      ...metadata,
+    })
   },
 
   apiRequest: (req: any, res: any, duration: number) => {
@@ -1062,12 +1371,22 @@ export const loggers = {
       duration,
       userAgent: req.headers['user-agent'],
       ip: req.ip || req.connection.remoteAddress,
-    });
+    })
   },
 
-  securityEvent: (event: string, severity: 'low' | 'medium' | 'high' | 'critical', metadata?: Record<string, any>) => {
-    const logLevel = severity === 'critical' ? 'error' : severity === 'high' ? 'warn' : 'info';
-    logger.log(logLevel, 'Security event', { category: 'security_event', event, severity, ...metadata });
+  securityEvent: (
+    event: string,
+    severity: 'low' | 'medium' | 'high' | 'critical',
+    metadata?: Record<string, any>
+  ) => {
+    const logLevel =
+      severity === 'critical' ? 'error' : severity === 'high' ? 'warn' : 'info'
+    logger.log(logLevel, 'Security event', {
+      category: 'security_event',
+      event,
+      severity,
+      ...metadata,
+    })
   },
 
   error: (error: Error, context?: Record<string, any>) => {
@@ -1076,9 +1395,9 @@ export const loggers = {
       message: error.message,
       stack: error.stack,
       ...context,
-    });
+    })
   },
-};
+}
 ```
 
 ### Health Check System
@@ -1087,29 +1406,51 @@ Comprehensive health monitoring endpoint:
 
 ```typescript
 // pages/api/health.ts
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const startTime = Date.now();
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const startTime = Date.now()
 
   try {
-    const [databaseCheck, redisCheck, memoryCheck, diskCheck] = await Promise.allSettled([
-      checkDatabase(),
-      checkRedis(),
-      checkMemory(),
-      checkDisk(),
-    ]);
+    const [databaseCheck, redisCheck, memoryCheck, diskCheck] =
+      await Promise.allSettled([
+        checkDatabase(),
+        checkRedis(),
+        checkMemory(),
+        checkDisk(),
+      ])
 
     const checks = {
-      database: databaseCheck.status === 'fulfilled' ? databaseCheck.value : { status: 'fail' },
-      redis: redisCheck.status === 'fulfilled' ? redisCheck.value : { status: 'fail' },
-      memory: memoryCheck.status === 'fulfilled' ? memoryCheck.value : { status: 'fail' },
-      disk: diskCheck.status === 'fulfilled' ? diskCheck.value : { status: 'fail' },
-    };
+      database:
+        databaseCheck.status === 'fulfilled'
+          ? databaseCheck.value
+          : { status: 'fail' },
+      redis:
+        redisCheck.status === 'fulfilled'
+          ? redisCheck.value
+          : { status: 'fail' },
+      memory:
+        memoryCheck.status === 'fulfilled'
+          ? memoryCheck.value
+          : { status: 'fail' },
+      disk:
+        diskCheck.status === 'fulfilled' ? diskCheck.value : { status: 'fail' },
+    }
 
-    const failedChecks = Object.values(checks).filter(check => check.status === 'fail');
-    const warnChecks = Object.values(checks).filter(check => check.status === 'warn');
+    const failedChecks = Object.values(checks).filter(
+      (check) => check.status === 'fail'
+    )
+    const warnChecks = Object.values(checks).filter(
+      (check) => check.status === 'warn'
+    )
 
-    const overallStatus = failedChecks.length > 0 ? 'unhealthy' :
-                         warnChecks.length > 0 ? 'degraded' : 'healthy';
+    const overallStatus =
+      failedChecks.length > 0
+        ? 'unhealthy'
+        : warnChecks.length > 0
+          ? 'degraded'
+          : 'healthy'
 
     const healthCheck = {
       status: overallStatus,
@@ -1117,12 +1458,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       uptime: process.uptime(),
       version: process.env.npm_package_version || '1.0.0',
       checks,
-    };
+    }
 
-    const statusCode = overallStatus === 'healthy' ? 200 :
-                      overallStatus === 'degraded' ? 200 : 503;
+    const statusCode =
+      overallStatus === 'healthy'
+        ? 200
+        : overallStatus === 'degraded'
+          ? 200
+          : 503
 
-    res.status(statusCode).json(healthCheck);
+    res.status(statusCode).json(healthCheck)
   } catch (error) {
     res.status(503).json({
       status: 'unhealthy',
@@ -1135,33 +1480,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         memory: { status: 'fail', message: 'Health check system error' },
         disk: { status: 'fail', message: 'Health check system error' },
       },
-    });
+    })
   }
 }
 
 async function checkDatabase() {
-  const start = Date.now();
+  const start = Date.now()
   try {
-    await prisma.$queryRaw`SELECT 1`;
-    const responseTime = Date.now() - start;
-    return responseTime > 1000 ?
-      { status: 'warn', responseTime, message: 'Database response time is slow' } :
-      { status: 'pass', responseTime, message: 'Database connection healthy' };
+    await prisma.$queryRaw`SELECT 1`
+    const responseTime = Date.now() - start
+    return responseTime > 1000
+      ? {
+          status: 'warn',
+          responseTime,
+          message: 'Database response time is slow',
+        }
+      : { status: 'pass', responseTime, message: 'Database connection healthy' }
   } catch (error) {
-    return { status: 'fail', responseTime: Date.now() - start, message: 'Database connection failed' };
+    return {
+      status: 'fail',
+      responseTime: Date.now() - start,
+      message: 'Database connection failed',
+    }
   }
 }
 
 async function checkRedis() {
-  const start = Date.now();
+  const start = Date.now()
   try {
-    await redis.ping();
-    const responseTime = Date.now() - start;
-    return responseTime > 500 ?
-      { status: 'warn', responseTime, message: 'Redis response time is slow' } :
-      { status: 'pass', responseTime, message: 'Redis connection healthy' };
+    await redis.ping()
+    const responseTime = Date.now() - start
+    return responseTime > 500
+      ? { status: 'warn', responseTime, message: 'Redis response time is slow' }
+      : { status: 'pass', responseTime, message: 'Redis connection healthy' }
   } catch (error) {
-    return { status: 'fail', responseTime: Date.now() - start, message: 'Redis connection failed' };
+    return {
+      status: 'fail',
+      responseTime: Date.now() - start,
+      message: 'Redis connection failed',
+    }
   }
 }
 ```
@@ -1173,39 +1530,51 @@ Grafana dashboard configuration for operational visibility:
 ```yaml
 # config/grafana/dashboard.json
 {
-  "dashboard": {
-    "title": "Kanban Application Monitoring",
-    "panels": [
-      {
-        "title": "Application Health",
-        "type": "stat",
-        "targets": [{ "expr": "up{job=\"kanban-app\"}" }]
-      },
-      {
-        "title": "Response Time",
-        "type": "graph",
-        "targets": [
-          { "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))" },
-          { "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))" }
-        ]
-      },
-      {
-        "title": "Request Rate",
-        "type": "graph",
-        "targets": [{ "expr": "rate(http_requests_total[5m])" }]
-      },
-      {
-        "title": "Error Rate",
-        "type": "graph",
-        "targets": [{ "expr": "rate(http_requests_total{status=~\"5..\"}[5m]) / rate(http_requests_total[5m])" }]
-      },
-      {
-        "title": "Active WebSocket Connections",
-        "type": "stat",
-        "targets": [{ "expr": "websocket_connections_active" }]
-      }
-    ]
-  }
+  'dashboard':
+    {
+      'title': 'Kanban Application Monitoring',
+      'panels':
+        [
+          {
+            'title': 'Application Health',
+            'type': 'stat',
+            'targets': [{ 'expr': 'up{job="kanban-app"}' }],
+          },
+          {
+            'title': 'Response Time',
+            'type': 'graph',
+            'targets':
+              [
+                {
+                  'expr': 'histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))',
+                },
+                {
+                  'expr': 'histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))',
+                },
+              ],
+          },
+          {
+            'title': 'Request Rate',
+            'type': 'graph',
+            'targets': [{ 'expr': 'rate(http_requests_total[5m])' }],
+          },
+          {
+            'title': 'Error Rate',
+            'type': 'graph',
+            'targets':
+              [
+                {
+                  'expr': 'rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])',
+                },
+              ],
+          },
+          {
+            'title': 'Active WebSocket Connections',
+            'type': 'stat',
+            'targets': [{ 'expr': 'websocket_connections_active' }],
+          },
+        ],
+    },
 }
 ```
 
@@ -1223,39 +1592,39 @@ groups:
         for: 1m
         labels: { severity: critical }
         annotations:
-          summary: "Kanban application is down"
-          description: "Application has been down for more than 1 minute."
+          summary: 'Kanban application is down'
+          description: 'Application has been down for more than 1 minute.'
 
       - alert: HighResponseTime
         expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
         for: 5m
         labels: { severity: warning }
         annotations:
-          summary: "High response time detected"
-          description: "95th percentile response time is {{ $value }}s, exceeding 2s threshold."
+          summary: 'High response time detected'
+          description: '95th percentile response time is {{ $value }}s, exceeding 2s threshold.'
 
       - alert: HighErrorRate
         expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
         for: 2m
         labels: { severity: critical }
         annotations:
-          summary: "High error rate detected"
-          description: "Error rate is {{ $value | humanizePercentage }}, exceeding 5% threshold."
+          summary: 'High error rate detected'
+          description: 'Error rate is {{ $value | humanizePercentage }}, exceeding 5% threshold.'
 
       - alert: DatabaseConnectionFailure
         expr: database_connections_failed_total > 0
         for: 1m
         labels: { severity: critical }
         annotations:
-          summary: "Database connection failures detected"
+          summary: 'Database connection failures detected'
 
       - alert: HighMemoryUsage
         expr: process_resident_memory_bytes / 1024 / 1024 > 512
         for: 5m
         labels: { severity: warning }
         annotations:
-          summary: "High memory usage"
-          description: "Memory usage is {{ $value }}MB, exceeding 512MB threshold."
+          summary: 'High memory usage'
+          description: 'Memory usage is {{ $value }}MB, exceeding 512MB threshold.'
 ```
 
 ### Error Tracking
@@ -1264,7 +1633,7 @@ Sentry integration for comprehensive error monitoring:
 
 ```typescript
 // lib/monitoring/sentry.ts
-import * as Sentry from '@sentry/nextjs';
+import * as Sentry from '@sentry/nextjs'
 
 export function initSentry() {
   Sentry.init({
@@ -1276,13 +1645,16 @@ export function initSentry() {
     beforeSend(event, hint) {
       // Filter out known non-critical errors
       if (event.exception) {
-        const error = hint.originalException;
-        if (error instanceof Error &&
-            (error.message.includes('Network Error') || error.message.includes('Failed to fetch'))) {
-          return null;
+        const error = hint.originalException
+        if (
+          error instanceof Error &&
+          (error.message.includes('Network Error') ||
+            error.message.includes('Failed to fetch'))
+        ) {
+          return null
         }
       }
-      return event;
+      return event
     },
 
     initialScope: {
@@ -1291,7 +1663,7 @@ export function initSentry() {
         version: process.env.npm_package_version || '1.0.0',
       },
     },
-  });
+  })
 }
 
 export function withErrorBoundary<P extends object>(
@@ -1301,10 +1673,10 @@ export function withErrorBoundary<P extends object>(
   return Sentry.withErrorBoundary(Component, {
     fallback: fallback || ErrorFallback,
     beforeCapture: (scope, error, errorInfo) => {
-      scope.setTag('errorBoundary', true);
-      scope.setContext('errorInfo', errorInfo);
+      scope.setTag('errorBoundary', true)
+      scope.setContext('errorInfo', errorInfo)
     },
-  });
+  })
 }
 ```
 
@@ -1313,6 +1685,7 @@ export function withErrorBoundary<P extends object>(
 This comprehensive fullstack architecture provides:
 
 ### ✅ **Complete Implementation Guide**
+
 - **Technology Stack:** Definitive selection with Next.js 14+, TypeScript, PostgreSQL, Redis
 - **Data Models:** Type-safe interfaces with Prisma ORM and optimized database schema
 - **API Specification:** tRPC implementation with end-to-end type safety
@@ -1321,13 +1694,15 @@ This comprehensive fullstack architecture provides:
 - **Security Framework:** Authentication, authorization, input validation, and data protection
 
 ### ✅ **Performance Targets Achieved**
-- **<2s load times:** SSR, caching, bundle optimization, and CDN integration
-- **<500ms interactions:** Optimistic updates, efficient state management, and database optimization
-- **60fps animations:** Hardware acceleration, virtual scrolling, and optimized rendering
-- **100+ concurrent users:** Connection pooling, horizontal scaling, and performance monitoring
+
+- **<2s load times:** SSR, React Query intelligent caching, bundle optimization, and CDN integration
+- **<500ms interactions:** React Query optimistic updates, request deduplication, and database optimization
+- **60fps animations:** Hardware acceleration, virtual scrolling, and React Query's minimal re-renders
+- **100+ concurrent users:** Connection pooling, React Query cache management, and horizontal scaling
 - **95%+ uptime:** Health checks, automated recovery, comprehensive monitoring and alerting
 
 ### ✅ **Production-Ready Features**
+
 - **Self-hosting support:** Complete Docker Compose stack with one-command deployment
 - **CI/CD pipeline:** Automated testing, security scanning, and deployment
 - **Monitoring & observability:** Performance monitoring, structured logging, health checks, and alerting
@@ -1335,6 +1710,7 @@ This comprehensive fullstack architecture provides:
 - **Testing strategy:** 80%+ code coverage with unit, integration, and E2E testing
 
 ### ✅ **Scalability & Maintainability**
+
 - **Horizontal scaling:** Load balancer ready with container orchestration support
 - **Database optimization:** Indexes, connection pooling, and query optimization
 - **Caching strategy:** Multi-level caching with Redis and application-level optimization
@@ -1342,4 +1718,7 @@ This comprehensive fullstack architecture provides:
 - **Documentation:** Complete architecture documentation with implementation guidance
 
 This architecture serves as the definitive guide for implementing a production-ready Kanban Board Application that meets all PRD requirements while providing enterprise-grade reliability, performance, and scalability.
+
+```
+
 ```
