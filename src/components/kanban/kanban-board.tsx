@@ -439,7 +439,6 @@ export function KanbanBoard({
                   onTaskClick={handleTaskClick}
                   onTaskDelete={handleDeleteClick}
                   onAddTask={handleAddTask}
-                  onTasksUpdated={onColumnsUpdated}
                   selectedTasks={selectedTasks}
                   onTaskSelect={handleTaskSelect}
                   showBulkSelection={showBulkSelection}
