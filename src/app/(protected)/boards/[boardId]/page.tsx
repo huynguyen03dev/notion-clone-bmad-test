@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { KanbanBoard } from '@/components/kanban/kanban-board';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Settings, Share2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { useBoard, useBoardColumns } from '@/hooks/use-board-data';
 
 interface Board {
   id: string;
@@ -39,69 +40,46 @@ export default function BoardPage() {
   const params = useParams();
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [board, setBoard] = useState<Board | null>(null);
-  const [columns, setColumns] = useState<Column[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const boardId = params.boardId as string;
 
-  useEffect(() => {
-    if (status === 'loading') return;
+  // 🚀 REACT QUERY SOLUTION: Replace problematic useEffect with React Query
+  const {
+    data: boardData,
+    isLoading: boardLoading,
+    error: boardError,
+    refetch: refetchBoard
+  } = useBoard(boardId);
 
-    if (!session) {
-      router.push('/signin');
-      return;
-    }
+  const {
+    data: columnsData,
+    isLoading: columnsLoading,
+    error: columnsError,
+    refetch: refetchColumns
+  } = useBoardColumns(boardId);
 
-    fetchBoard();
-  }, [boardId, session, status]);
+  // Extract data from React Query responses
+  const board = boardData?.board || null;
+  const columns = columnsData?.columns || [];
+  const loading = boardLoading || columnsLoading;
+  const error = boardError?.message || columnsError?.message || null;
 
-  const fetchBoard = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  // Handle authentication redirect
+  if (status === 'loading') {
+    return <div>Loading...</div>;
+  }
 
-      // Fetch board details
-      const boardResponse = await fetch(`/api/boards/${boardId}`);
-      if (!boardResponse.ok) {
-        if (boardResponse.status === 404) {
-          setError('Board not found');
-          return;
-        }
-        if (boardResponse.status === 403) {
-          setError('You do not have permission to view this board');
-          return;
-        }
-        throw new Error('Failed to fetch board');
-      }
+  if (!session) {
+    router.push('/signin');
+    return null;
+  }
 
-      const boardData = await boardResponse.json();
-      setBoard(boardData.board);
-
-      // Fetch board columns
-      const columnsResponse = await fetch(`/api/boards/${boardId}/columns`);
-      if (!columnsResponse.ok) {
-        throw new Error('Failed to fetch columns');
-      }
-
-      const columnsData = await columnsResponse.json();
-      setColumns(columnsData.columns || []);
-
-    } catch (error) {
-      console.error('Error fetching board:', error);
-      setError('Failed to load board');
-      toast.error('Failed to load board');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // 🎉 NO MORE PROBLEMATIC fetchBoard FUNCTION! React Query handles everything!
 
   const handleColumnsUpdated = () => {
-    // PREVENT INFINITE LOOP: Only re-fetch board if it's a user action, not initial load
-    console.log('🔄 handleColumnsUpdated called - preventing infinite loop by not calling fetchBoard()');
-    // Don't automatically re-fetch the board as this causes infinite loops
-    // The TaskList components manage their own state
+    // 🚀 REACT QUERY SOLUTION: Use React Query's refetch instead of manual state management
+    console.log('🔄 handleColumnsUpdated called - using React Query refetch');
+    refetchColumns();
   };
 
   if (status === 'loading' || loading) {
