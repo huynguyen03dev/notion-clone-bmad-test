@@ -5,6 +5,40 @@ import { useSession } from 'next-auth/react'
 import { UserPresence } from './user-presence'
 import { WebSocketStatus } from './websocket-status'
 
+// Mock users data - hoisted to module scope to maintain stable reference
+const MOCK_USERS: UserPresence[] = [
+  {
+    id: '1',
+    name: 'Alice Johnson',
+    email: 'alice@example.com',
+    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face',
+    isOnline: true,
+    status: 'active',
+    currentBoard: 'board-1',
+    currentBoardName: 'Project Alpha'
+  },
+  {
+    id: '2',
+    name: 'Bob Smith',
+    email: 'bob@example.com',
+    initials: 'BS',
+    isOnline: true,
+    status: 'idle',
+    currentBoard: 'board-1',
+    currentBoardName: 'Project Alpha'
+  },
+  {
+    id: '3',
+    name: 'Carol Davis',
+    email: 'carol@example.com',
+    initials: 'CD',
+    isOnline: false,
+    lastSeen: new Date(Date.now() - 1000 * 60 * 30),
+    currentBoard: 'board-2',
+    currentBoardName: 'Marketing Campaign'
+  }
+]
+
 interface CollaborationContextType {
   // Connection status
   isConnected: boolean
@@ -52,38 +86,7 @@ export function CollaborationProvider({ children }: CollaborationProviderProps) 
   mockSocketRef.current = mockSocket
 
   // Mock users data - in real implementation this would come from WebSocket
-  const mockUsers: UserPresence[] = [
-    {
-      id: '1',
-      name: 'Alice Johnson',
-      email: 'alice@example.com',
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face',
-      isOnline: true,
-      status: 'active',
-      currentBoard: 'board-1',
-      currentBoardName: 'Project Alpha'
-    },
-    {
-      id: '2',
-      name: 'Bob Smith',
-      email: 'bob@example.com',
-      initials: 'BS',
-      isOnline: true,
-      status: 'idle',
-      currentBoard: 'board-1',
-      currentBoardName: 'Project Alpha'
-    },
-    {
-      id: '3',
-      name: 'Carol Davis',
-      email: 'carol@example.com',
-      initials: 'CD',
-      isOnline: false,
-      lastSeen: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-      currentBoard: 'board-2',
-      currentBoardName: 'Marketing Campaign'
-    }
-  ]
+  // Hoisted to module scope (see top of file) to maintain stable reference
 
   // 🔧 FIX: Make connect function stable by using refs instead of state dependencies
   const connect = useCallback(() => {
@@ -101,11 +104,11 @@ export function CollaborationProvider({ children }: CollaborationProviderProps) 
       // Load initial users for current board using ref to avoid dependency
       const board = currentBoardRef.current
       if (board) {
-        const boardUsers = mockUsers.filter(user => user.currentBoard === board)
+        const boardUsers = MOCK_USERS.filter(user => user.currentBoard === board)
         setCurrentUsers(boardUsers)
       }
     }, 1000)
-  }, [mockUsers]) // 🔧 Include mockUsers dependency as required by ESLint
+  }, [])
 
   // 🔧 FIX: disconnect function is already stable with empty dependencies
   const disconnect = useCallback(() => {
@@ -130,7 +133,7 @@ export function CollaborationProvider({ children }: CollaborationProviderProps) 
     const socket = mockSocketRef.current
     if (socket.connected) {
       // Filter users for the specific board
-      const boardUsers = mockUsers.filter(user => user.currentBoard === boardId)
+      const boardUsers = MOCK_USERS.filter(user => user.currentBoard === boardId)
       setCurrentUsers(boardUsers)
 
       // Add current user to the list if authenticated
@@ -153,7 +156,7 @@ export function CollaborationProvider({ children }: CollaborationProviderProps) 
         })
       }
     }
-  }, [mockUsers]) // 🔧 Include mockUsers dependency as required by ESLint
+  }, [])
 
   const leaveBoard = useCallback(() => {
     setCurrentBoard(undefined)
