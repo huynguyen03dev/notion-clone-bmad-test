@@ -105,7 +105,30 @@ export function CollaborationProvider({ children }: CollaborationProviderProps) 
       const board = currentBoardRef.current
       if (board) {
         const boardUsers = MOCK_USERS.filter(user => user.currentBoard === board)
-        setCurrentUsers(boardUsers)
+
+        // Ensure the authenticated user is present immediately after connect
+        const currentSessionAfterConnect = sessionRef.current
+        const withCurrentUser = (() => {
+          if (!currentSessionAfterConnect?.user) return boardUsers
+          const currentUserId = currentSessionAfterConnect.user.id || 'current'
+          const exists = boardUsers.some(u => u.id === currentUserId)
+          if (exists) return boardUsers
+          return [
+            {
+              id: currentUserId,
+              name: currentSessionAfterConnect.user.name || 'You',
+              email: currentSessionAfterConnect.user.email || '',
+              avatar: currentSessionAfterConnect.user.image || undefined,
+              isOnline: true,
+              status: 'active' as const,
+              currentBoard: board,
+              currentBoardName: `Board ${board}`,
+            },
+            ...boardUsers,
+          ]
+        })()
+
+        setCurrentUsers(withCurrentUser)
       }
     }, 1000)
   }, [])
@@ -217,8 +240,11 @@ export function CollaborationProvider({ children }: CollaborationProviderProps) 
         const userId = currentSession.user.id || 'current'
         const currentUser = prev.find(u => u.id === userId)
 
+        // If current user isn't present yet, do nothing to avoid unnecessary updates
+        if (!currentUser) return prev
+
         // Only update if status is different to prevent unnecessary re-renders
-        if (currentUser?.status === 'active') return prev
+        if (currentUser.status === 'active') return prev
 
         return prev.map(user =>
           user.id === userId
@@ -235,7 +261,8 @@ export function CollaborationProvider({ children }: CollaborationProviderProps) 
         setCurrentUsers(prev => {
           const userId = session.user.id || 'current'
           const currentUser = prev.find(u => u.id === userId)
-          if (currentUser?.status === 'idle') return prev
+          if (!currentUser) return prev
+          if (currentUser.status === 'idle') return prev
 
           return prev.map(user =>
             user.id === userId
@@ -252,7 +279,8 @@ export function CollaborationProvider({ children }: CollaborationProviderProps) 
           setCurrentUsers(prev => {
             const userId = session.user.id || 'current'
             const currentUser = prev.find(u => u.id === userId)
-            if (currentUser?.status === 'away') return prev
+            if (!currentUser) return prev
+            if (currentUser.status === 'away') return prev
 
             return prev.map(user =>
               user.id === userId

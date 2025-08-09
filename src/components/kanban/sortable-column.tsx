@@ -70,7 +70,7 @@ export function SortableColumn({
         setDroppableRef(node);
       }}
       style={style}
-      className={`bg-gray-50 rounded-lg border min-w-[280px] max-w-[280px] flex flex-col ${isDragging ? 'opacity-50 shadow-lg' : ''
+      className={`bg-muted/30 dark:bg-muted/20 rounded-lg border border-border min-w-[280px] max-w-[280px] flex flex-col ${isDragging ? 'opacity-50 shadow-lg' : ''
         } ${isOver ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}`}
       {...attributes}
     >

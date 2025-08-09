@@ -39,15 +39,18 @@ export function TaskList({
 
   // 🚨 EMERGENCY SIMPLE SOLUTION: Basic state management to stop infinite loop
   const [tasks, setTasks] = useState<TaskWithDetails[]>([]);
-  const [isLoadingTasks, setIsLoadingTasks] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Temporary alias to guard against stale references in compiled bundles
+  const isLoading = loading;
+
 
   // 🔧 STABLE DATA FETCHING: Only fetch when columnId or boardId changes
   const fetchTasks = useCallback(async () => {
     if (!columnId || !boardId) return;
 
     try {
-      setIsLoadingTasks(true);
+      setLoading(true);
       setError(null);
 
       const response = await fetch(`/api/tasks?columnId=${columnId}&boardId=${boardId}&sortBy=position&sortOrder=asc&limit=100`);
@@ -63,7 +66,7 @@ export function TaskList({
       console.error('❌ Simple fetch: Failed to load tasks:', err);
       setError(err instanceof Error ? err.message : 'Failed to load tasks');
     } finally {
-      setIsLoadingTasks(false);
+      setLoading(false);
     }
   }, [columnId, boardId]);
 
@@ -114,7 +117,7 @@ export function TaskList({
     fetchTasks(); // 🔧 FIX: Use fetchTasks instead of refetch
   };
 
-  if (isLoadingTasks) {
+  if (isLoading) {
     return (
       <div className="space-y-2">
         {[...Array(3)].map((_, i) => (
@@ -153,14 +156,14 @@ export function TaskList({
         variant="ghost"
         size="sm"
         className={cn(
-          'w-full justify-start text-gray-500 hover:text-gray-700',
-          'border-2 border-dashed border-gray-200 hover:border-gray-300',
-          'h-auto py-3 px-3'
+          'w-full justify-start text-muted-foreground hover:text-foreground',
+          'border-2 border-dashed border-border hover:border-border/80',
+          'h-auto py-3 px-3 hover:bg-muted/50'
         )}
         onClick={handleAddTask}
-        disabled={isLoadingTasks}
+        disabled={isLoading}
       >
-        {isLoadingTasks ? (
+        {isLoading ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         ) : (
           <Plus className="mr-2 h-4 w-4" />
@@ -171,10 +174,10 @@ export function TaskList({
       {/* Empty state */}
       {tasks.length === 0 && (
         <div className="text-center py-8">
-          <div className="text-gray-400 text-sm">
+          <div className="text-muted-foreground text-sm">
             No tasks yet
           </div>
-          <div className="text-gray-400 text-xs mt-1">
+          <div className="text-muted-foreground text-xs mt-1">
             Click "Add a task" to get started
           </div>
         </div>

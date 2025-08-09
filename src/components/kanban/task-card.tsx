@@ -88,13 +88,13 @@ export function TaskCard({
   return (
     <div
       className={cn(
-        'bg-white rounded-lg border p-3 cursor-pointer transition-all duration-200',
-        'hover:shadow-md hover:border-gray-300',
+        'bg-card rounded-lg border border-border p-3 cursor-pointer transition-all duration-200',
+        'hover:shadow-md hover:border-border/80 dark:hover:border-border/60',
         isDragging && 'opacity-50 shadow-lg rotate-2',
         'group relative',
         isSelected
-          ? 'border-blue-500 bg-blue-50 shadow-md ring-2 ring-blue-200'
-          : 'border-gray-200'
+          ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30 shadow-md ring-2 ring-blue-200 dark:ring-blue-800'
+          : 'border-border'
       )}
       onClick={handleCardClick}
     >
@@ -110,7 +110,7 @@ export function TaskCard({
             {isSelected ? (
               <CheckSquare className="h-4 w-4 text-blue-600" />
             ) : (
-              <Square className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+              <Square className="h-4 w-4 text-muted-foreground hover:text-foreground" />
             )}
             <span className="sr-only">
               {isSelected ? 'Deselect task' : 'Select task'}
@@ -122,7 +122,7 @@ export function TaskCard({
       {/* Header with title and menu */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <h3 className={cn(
-          "text-sm font-medium text-gray-900 line-clamp-2 flex-1",
+          "text-sm font-medium text-card-foreground line-clamp-2 flex-1",
           showSelection && "ml-6"
         )}>
           {task.title}
@@ -163,7 +163,7 @@ export function TaskCard({
 
       {/* Description */}
       {task.description && (
-        <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+        <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
           {task.description}
         </p>
       )}
@@ -188,9 +188,9 @@ export function TaskCard({
           {task.dueDate && (
             <div className={cn(
               'flex items-center gap-1 text-xs',
-              isOverdue && 'text-red-600',
-              isDueSoon && 'text-orange-600',
-              !isOverdue && !isDueSoon && 'text-gray-500'
+              isOverdue && 'text-red-600 dark:text-red-400',
+              isDueSoon && 'text-orange-600 dark:text-orange-400',
+              !isOverdue && !isDueSoon && 'text-muted-foreground'
             )}>
               <Calendar className="h-3 w-3" />
               <span>{formatDate(task.dueDate)}</span>
@@ -211,12 +211,12 @@ export function TaskCard({
                   {task.assignee.name?.charAt(0).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-xs text-gray-600 max-w-[80px] truncate">
+              <span className="text-xs text-muted-foreground max-w-[80px] truncate">
                 {task.assignee.name}
               </span>
             </div>
           ) : (
-            <div className="flex items-center gap-1 text-xs text-gray-400">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <User className="h-3 w-3" />
               <span>Unassigned</span>
             </div>
