@@ -109,10 +109,10 @@ export function ColumnColorPicker({
                 <button
                   key={color.value}
                   type="button"
-                  className={`w-12 h-12 rounded-lg border-2 transition-all hover:scale-105 ${
+                className={`w-12 h-12 rounded-lg border-2 transition-all hover:scale-105 ${
                     selectedColor === color.value
-                      ? 'border-gray-900 ring-2 ring-gray-300'
-                      : 'border-gray-300 hover:border-gray-500'
+                      ? 'border-foreground ring-2 ring-muted'
+                      : 'border-border hover:border-foreground/50'
                   }`}
                   style={{ backgroundColor: color.value }}
                   onClick={() => handleColorSelect(color.value)}
@@ -139,13 +139,13 @@ export function ColumnColorPicker({
                 maxLength={7}
               />
               <div
-                className="w-12 h-10 rounded border-2 border-gray-300 flex-shrink-0"
+                className="w-12 h-10 rounded border-2 border-border flex-shrink-0"
                 style={{
                   backgroundColor: customColor.match(/^#[0-9A-F]{6}$/i) ? customColor : '#f3f4f6',
                 }}
               />
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Enter a hex color code (e.g., #3B82F6)
             </p>
           </div>
@@ -178,7 +178,7 @@ export function ColumnColorPicker({
               >
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">{column.name}</span>
-                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
                     Preview
                   </span>
                 </div>

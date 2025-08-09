@@ -323,8 +323,8 @@ export function TaskDetailModal({
             {/* Task Description */}
             {task.description && (
               <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-2">Description</h4>
-                <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                <h4 className="text-sm font-medium mb-2">Description</h4>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                   {task.description}
                 </p>
               </div>
@@ -334,16 +334,16 @@ export function TaskDetailModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Due Date */}
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100">
-                  <Calendar className="w-4 h-4 text-gray-600" />
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-muted">
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">Due Date</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Due Date</p>
                   <p className={cn(
                     'text-sm font-medium',
                     isOverdue && 'text-red-600',
                     isDueSoon && 'text-orange-600',
-                    !isOverdue && !isDueSoon && 'text-gray-900'
+                    !isOverdue && !isDueSoon && 'text-foreground'
                   )}>
                     {formatDate(task.dueDate)}
                   </p>
@@ -352,11 +352,11 @@ export function TaskDetailModal({
 
               {/* Assignee */}
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100">
-                  <User className="w-4 h-4 text-gray-600" />
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-muted">
+                  <User className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">Assignee</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Assignee</p>
                   {task.assignee ? (
                     <div className="flex items-center gap-2">
                       <Avatar className="w-5 h-5">
@@ -365,12 +365,12 @@ export function TaskDetailModal({
                           {task.assignee.name?.charAt(0).toUpperCase() || 'U'}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium">
                         {task.assignee.name}
                       </span>
                     </div>
                   ) : (
-                    <p className="text-sm font-medium text-gray-500">Unassigned</p>
+                    <p className="text-sm font-medium text-muted-foreground">Unassigned</p>
                   )}
                 </div>
               </div>
@@ -379,12 +379,12 @@ export function TaskDetailModal({
             {/* Task Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Column</p>
-                <p className="text-sm font-medium text-gray-900">{task.column.name}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Column</p>
+                <p className="text-sm font-medium">{task.column.name}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Board</p>
-                <p className="text-sm font-medium text-gray-900">{task.board.name}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Board</p>
+                <p className="text-sm font-medium">{task.board.name}</p>
               </div>
             </div>
 

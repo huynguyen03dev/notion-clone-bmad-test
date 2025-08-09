@@ -7,6 +7,7 @@ import { TaskWithDetails } from '@/types/task';
 // import { useColumnTasks, useDeleteTask, useDuplicateTask } from '@/hooks/use-task-data';
 import { Button } from '@/components/ui/button';
 import { Plus, Loader2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useCallback } from 'react';
 
@@ -21,6 +22,7 @@ interface TaskListProps {
   selectedTasks?: Set<string>;
   onTaskSelect?: (taskId: string, selected: boolean) => void;
   showBulkSelection?: boolean;
+  refreshKey?: number;
 }
 
 export function TaskList({
@@ -34,6 +36,7 @@ export function TaskList({
   selectedTasks = new Set(),
   onTaskSelect,
   showBulkSelection = false,
+  refreshKey,
 }: TaskListProps) {
   console.log('🔥 TaskList component rendered for column:', columnId);
 
@@ -74,6 +77,13 @@ export function TaskList({
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
+
+  // Refetch when parent signals a refresh (e.g., after drag-and-drop)
+  useEffect(() => {
+    if (refreshKey !== undefined) {
+      fetchTasks();
+    }
+  }, [refreshKey, fetchTasks]);
 
   // 🚨 SIMPLE HANDLERS: No complex mutations, just basic operations
   const handleTaskDelete = async (taskId: string) => {
@@ -121,10 +131,7 @@ export function TaskList({
     return (
       <div className="space-y-2">
         {[...Array(3)].map((_, i) => (
-          <div
-            key={i}
-            className="bg-gray-100 rounded-lg h-20 animate-pulse"
-          />
+          <Skeleton key={i} className="h-20 w-full rounded-lg" />
         ))}
       </div>
     );

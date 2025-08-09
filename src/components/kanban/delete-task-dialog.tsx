@@ -66,13 +66,13 @@ export function DeleteTaskDialog({
             <p>
               Are you sure you want to delete <strong>"{task.title}"</strong>?
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               This action cannot be undone. The task will be permanently removed from the board.
             </p>
             {task.description && (
-              <div className="mt-3 p-3 bg-gray-50 rounded-md">
-                <p className="text-xs text-gray-600 font-medium mb-1">Task Description:</p>
-                <p className="text-xs text-gray-700 line-clamp-3">
+              <div className="mt-3 p-3 bg-muted rounded-md">
+                <p className="text-xs text-muted-foreground font-medium mb-1">Task Description:</p>
+                <p className="text-xs text-foreground/80 line-clamp-3">
                   {task.description}
                 </p>
               </div>

@@ -131,7 +131,7 @@ export function ColumnHeader({
           </button>
         )}
         
-        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+        <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
           {column._count.tasks}
         </span>
       </div>

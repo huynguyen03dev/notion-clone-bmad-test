@@ -62,8 +62,8 @@ export function WebSocketStatusIndicator({
       default:
         return {
           icon: WifiOff,
-          color: 'text-gray-500',
-          bgColor: 'bg-gray-500',
+          color: 'text-muted-foreground',
+          bgColor: 'bg-muted-foreground',
           text: 'Disconnected',
           description: 'Real-time updates unavailable'
         }

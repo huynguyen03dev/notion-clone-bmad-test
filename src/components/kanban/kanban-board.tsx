@@ -62,6 +62,7 @@ export function KanbanBoard({
   onAddTask,
 }: KanbanBoardProps) {
   const [columns, setColumns] = useState(initialColumns);
+  const [taskRefreshKey, setTaskRefreshKey] = useState(0);
   const [activeColumn, setActiveColumn] = useState<Column | null>(null);
   const [activeTask, setActiveTask] = useState<TaskWithDetails | null>(null);
   const [colorPickerColumn, setColorPickerColumn] = useState<Column | null>(null);
@@ -153,7 +154,8 @@ export function KanbanBoard({
       // Determine target column and position
       if (over.data.current?.type === 'column') {
         // Dropped on a column - move to end of that column
-        targetColumnId = over.id as string;
+        // Important: use the column id from droppable data, not the droppable element id
+        targetColumnId = (over.data.current as any).column?.id ?? targetColumnId;
         newPosition = 0; // Will be calculated on server
       } else if (over.data.current?.type === 'task') {
         // Dropped on another task - insert at that position
@@ -172,6 +174,8 @@ export function KanbanBoard({
         if (result) {
           // Refresh columns to update task counts
           onColumnsUpdated?.();
+          // Trigger task lists to refetch so UI reflects move immediately
+          setTaskRefreshKey((k) => k + 1);
         }
       }
     }
@@ -198,6 +202,7 @@ export function KanbanBoard({
       setSelectedTask(result);
       // Refresh columns to update task counts and data
       onColumnsUpdated?.();
+      setTaskRefreshKey((k) => k + 1);
     }
   };
 
@@ -205,6 +210,7 @@ export function KanbanBoard({
     const success = await deleteTask(taskId);
     if (success) {
       onColumnsUpdated?.();
+      setTaskRefreshKey((k) => k + 1);
     }
   };
 
@@ -212,6 +218,7 @@ export function KanbanBoard({
     const duplicatedTask = await duplicateTask(taskId);
     if (duplicatedTask) {
       onColumnsUpdated?.();
+      setTaskRefreshKey((k) => k + 1);
     }
   };
 
@@ -229,6 +236,7 @@ export function KanbanBoard({
     const newTask = await createTask(data);
     if (newTask) {
       onColumnsUpdated?.();
+      setTaskRefreshKey((k) => k + 1);
     }
   };
 
@@ -251,6 +259,7 @@ export function KanbanBoard({
       // Add to undo stack
       addTaskDeletion(task, taskIndex, task.columnId);
       onColumnsUpdated?.();
+      setTaskRefreshKey((k) => k + 1);
     }
   };
 
@@ -299,6 +308,7 @@ export function KanbanBoard({
       // Add to undo stack
       addBulkTaskDeletion(tasksToDelete);
       onColumnsUpdated?.();
+      setTaskRefreshKey((k) => k + 1);
     }
   };
 
@@ -308,6 +318,7 @@ export function KanbanBoard({
 
     if (results.some(task => task)) {
       onColumnsUpdated?.();
+      setTaskRefreshKey((k) => k + 1);
     }
   };
 
@@ -319,6 +330,7 @@ export function KanbanBoard({
 
     if (results.some(task => task)) {
       onColumnsUpdated?.();
+      setTaskRefreshKey((k) => k + 1);
     }
   };
 
@@ -350,6 +362,7 @@ export function KanbanBoard({
 
     if (success) {
       console.log('Undo successful');
+      setTaskRefreshKey((k) => k + 1);
     }
   };
 
@@ -405,7 +418,7 @@ export function KanbanBoard({
             )}
           </Button>
           {showBulkSelection && (
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               Click tasks to select them for bulk operations
             </span>
           )}
@@ -435,6 +448,7 @@ export function KanbanBoard({
                 <TaskList
                   columnId={column.id}
                   boardId={boardId}
+                  refreshKey={taskRefreshKey}
                   onTaskEdit={onTaskEdit}
                   onTaskClick={handleTaskClick}
                   onTaskDelete={handleDeleteClick}
@@ -454,7 +468,7 @@ export function KanbanBoard({
               disabled={isAtMaxColumns || isUpdatingColumn}
             />
             {isAtMaxColumns && (
-              <p className="text-xs text-gray-500 mt-2 max-w-[200px]">
+              <p className="text-xs text-muted-foreground mt-2 max-w-[200px]">
                 Maximum of 10 columns reached
               </p>
             )}
@@ -463,17 +477,17 @@ export function KanbanBoard({
 
         <DragOverlay>
           {activeColumn && (
-            <div className="bg-gray-50 rounded-lg border min-w-[280px] max-w-[280px] flex flex-col opacity-90 shadow-lg">
+            <div className="bg-card rounded-lg border min-w-[280px] max-w-[280px] flex flex-col opacity-90 shadow-lg">
               <div className="p-3 border-b">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">{activeColumn.name}</span>
-                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
                     {activeColumn._count.tasks}
                   </span>
                 </div>
               </div>
-              <div className="flex-1 p-3 min-h-[200px] bg-gray-100">
-                <div className="text-sm text-gray-500 text-center py-8">
+              <div className="flex-1 p-3 min-h-[200px] bg-muted">
+                <div className="text-sm text-muted-foreground text-center py-8">
                   Tasks will appear here
                 </div>
               </div>

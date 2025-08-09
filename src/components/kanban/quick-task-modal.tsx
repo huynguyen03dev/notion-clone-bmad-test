@@ -108,7 +108,7 @@ export function QuickTaskModal({
             <Plus className="w-5 h-5" />
             Create New Task
             {columnName && (
-              <span className="text-sm font-normal text-gray-500">
+              <span className="text-sm font-normal text-muted-foreground">
                 in {columnName}
               </span>
             )}

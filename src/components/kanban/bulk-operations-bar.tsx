@@ -94,11 +94,11 @@ export function BulkOperationsBar({
 
   return (
     <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
-      <div className="bg-white border border-gray-200 rounded-lg shadow-lg px-4 py-3 flex items-center gap-3 min-w-[400px]">
+      <div className="bg-card border rounded-lg shadow-lg px-4 py-3 flex items-center gap-3 min-w-[400px]">
         {/* Selection Info */}
         <div className="flex items-center gap-2">
-          <CheckSquare className="h-4 w-4 text-blue-600" />
-          <span className="text-sm font-medium text-gray-900">
+          <CheckSquare className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium">
             {selectedTasks.length} task{selectedTasks.length !== 1 ? 's' : ''} selected
           </span>
           <Badge variant="secondary" className="text-xs">
@@ -147,7 +147,7 @@ export function BulkOperationsBar({
             size="sm"
             onClick={handleDeleteSelected}
             disabled={isDisabled}
-            className="h-8 px-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="h-8 px-3 text-destructive hover:text-destructive"
           >
             <Trash2 className="h-3 w-3 mr-1" />
             Delete
@@ -196,8 +196,8 @@ export function BulkOperationsBar({
         {/* Loading Indicator */}
         {isProcessing && (
           <div className="flex items-center gap-2 ml-2">
-            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-            <span className="text-xs text-gray-600">Processing...</span>
+            <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <span className="text-xs text-muted-foreground">Processing...</span>
           </div>
         )}
       </div>
