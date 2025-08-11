@@ -10,6 +10,7 @@ import { Plus, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useCallback } from 'react';
+import { useTaskApi } from '@/hooks/use-task-api';
 
 interface TaskListProps {
   columnId: string;
@@ -40,15 +41,15 @@ export function TaskList({
 }: TaskListProps) {
   console.log('🔥 TaskList component rendered for column:', columnId);
 
-  // 🚨 EMERGENCY SIMPLE SOLUTION: Basic state management to stop infinite loop
+  // Local UI state
   const [tasks, setTasks] = useState<TaskWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  // Temporary alias to guard against stale references in compiled bundles
+  const [, setError] = useState<string | null>(null);
   const isLoading = loading;
 
+  // Use shared API hook so tests can mock network calls easily
+  const { getTasks, deleteTask, duplicateTask } = useTaskApi();
 
-  // 🔧 STABLE DATA FETCHING: Only fetch when columnId or boardId changes
   const fetchTasks = useCallback(async () => {
     if (!columnId || !boardId) return;
 
@@ -56,22 +57,21 @@ export function TaskList({
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/tasks?columnId=${columnId}&boardId=${boardId}&sortBy=position&sortOrder=asc&limit=100`);
+      const data = await getTasks({
+        columnId,
+        boardId,
+        sortBy: 'position',
+        sortOrder: 'asc',
+      });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch tasks: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setTasks(data.tasks || []);
-      console.log('✅ Simple fetch: Successfully loaded tasks:', data.tasks?.length || 0);
+      setTasks(data?.tasks || []);
     } catch (err) {
-      console.error('❌ Simple fetch: Failed to load tasks:', err);
+      console.error('TaskList: failed to load tasks:', err);
       setError(err instanceof Error ? err.message : 'Failed to load tasks');
     } finally {
       setLoading(false);
     }
-  }, [columnId, boardId]);
+  }, [columnId, boardId, getTasks]);
 
   // 🔧 STABLE EFFECT: Only run when dependencies change
   useEffect(() => {
@@ -88,32 +88,24 @@ export function TaskList({
   // 🚨 SIMPLE HANDLERS: No complex mutations, just basic operations
   const handleTaskDelete = async (taskId: string) => {
     try {
-      const response = await fetch(`/api/tasks/${taskId}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete task');
-
-      // Simple state update
+      const ok = await deleteTask(taskId);
+      if (!ok) throw new Error('Failed to delete task');
       setTasks(prev => prev.filter(task => task.id !== taskId));
-      console.log('✅ Simple delete: Task deleted successfully');
+      onTasksUpdated?.();
     } catch (error) {
-      console.error('❌ Simple delete: Failed to delete task:', error);
+      console.error('TaskList: failed to delete task:', error);
     }
   };
 
   const handleTaskDuplicate = async (taskId: string) => {
     try {
-      const response = await fetch(`/api/tasks/${taskId}/duplicate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ columnId, boardId })
-      });
-
-      if (!response.ok) throw new Error('Failed to duplicate task');
-
-      // Refetch tasks to get the new one
-      await fetchTasks();
-      console.log('✅ Simple duplicate: Task duplicated successfully');
+      const duplicated = await duplicateTask(taskId, columnId);
+      if (duplicated) {
+        await fetchTasks();
+        onTasksUpdated?.();
+      }
     } catch (error) {
-      console.error('❌ Simple duplicate: Failed to duplicate task:', error);
+      console.error('TaskList: failed to duplicate task:', error);
     }
   };
 
@@ -122,10 +114,10 @@ export function TaskList({
   };
 
   // 🚀 REACT QUERY SOLUTION: Simple refetch instead of complex refresh logic
-  const refreshTasks = () => {
-    console.log('🔄 Refreshing tasks for column:', columnId);
-    fetchTasks(); // 🔧 FIX: Use fetchTasks instead of refetch
-  };
+  // const refreshTasks = () => {
+  //   console.log('🔄 Refreshing tasks for column:', columnId);
+  //   fetchTasks(); // 🔧 FIX: Use fetchTasks instead of refetch
+  // };
 
   if (isLoading) {
     return (
@@ -185,7 +177,7 @@ export function TaskList({
             No tasks yet
           </div>
           <div className="text-muted-foreground text-xs mt-1">
-            Click "Add a task" to get started
+            Click &ldquo;Add a task&rdquo; to get started
           </div>
         </div>
       )}

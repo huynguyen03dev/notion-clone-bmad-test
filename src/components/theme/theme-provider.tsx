@@ -37,7 +37,7 @@ export function ThemeProvider({
     if (storedTheme) {
       setTheme(storedTheme)
     }
-  }, [])
+  }, [storageKey])
 
   useEffect(() => {
     const root = window.document.documentElement
@@ -82,8 +82,10 @@ export function ThemeProvider({
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext)
 
-  if (context === undefined)
+  // When used outside the provider, we want an explicit error per tests
+  if ((context as any) === undefined || (context as any) === initialState) {
     throw new Error('useTheme must be used within a ThemeProvider')
+  }
 
   return context
 }

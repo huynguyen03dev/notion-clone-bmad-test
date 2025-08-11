@@ -58,8 +58,8 @@ export function KanbanBoard({
   columns: initialColumns,
   onColumnsUpdated,
   onTaskEdit,
-  onTaskClick,
-  onAddTask,
+  onTaskClick: _onTaskClick,
+  onAddTask: _onAddTask,
 }: KanbanBoardProps) {
   const [columns, setColumns] = useState(initialColumns);
   const [taskRefreshKey, setTaskRefreshKey] = useState(0);
@@ -130,10 +130,20 @@ export function KanbanBoard({
         // Optimistic update
         setColumns(updatedColumns);
 
-        // Update the moved column's position on the server
-        const result = await updateColumn(active.id as string, {
+        // Update the moved column's position on the server with retry logic
+        let result = await updateColumn(active.id as string, {
           position: overIndex,
         });
+
+        // If position conflict, refresh and retry once
+        if (!result) {
+          console.log('Column update failed, refreshing and retrying...');
+          onColumnsUpdated?.();
+          await new Promise(resolve => setTimeout(resolve, 100)); // Brief delay
+          result = await updateColumn(active.id as string, {
+            position: overIndex,
+          });
+        }
 
         if (result) {
           // Refresh columns from parent

@@ -16,12 +16,47 @@ interface TasksResponse {
 export function useTaskApi() {
   const [isLoading, setIsLoading] = useState(false)
 
+  // Ensure relative URLs work in Node/jsdom test environments
+  const resolveUrl = useCallback((path: string) => {
+    if (/^https?:\/\//i.test(path)) return path
+    try {
+      if (typeof window !== 'undefined' && window.location?.origin) {
+        return new URL(path, window.location.origin).toString()
+      }
+    } catch {}
+    const base =
+      process.env.TEST_BASE_URL ||
+      process.env.VITE_TEST_BASE_URL ||
+      'http://localhost:3000'
+    return new URL(path, base).toString()
+  }, [])
+
+  // Try relative first (helps tests that assert on fetch args),
+  // then fall back to absolute URL if the environment requires it (Node/undici)
+  const safeFetch = useCallback(
+    async (path: string, init?: RequestInit) => {
+      try {
+        return await fetch(path, init)
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e)
+        if (
+          msg.includes('Invalid URL') ||
+          msg.includes('Failed to parse URL')
+        ) {
+          return await fetch(resolveUrl(path), init)
+        }
+        throw e
+      }
+    },
+    [resolveUrl]
+  )
+
   const createTask = useCallback(
     async (data: CreateTaskRequest): Promise<TaskWithDetails | null> => {
       setIsLoading(true)
 
       try {
-        const response = await fetch('/api/tasks', {
+        const response = await safeFetch('/api/tasks', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -47,7 +82,7 @@ export function useTaskApi() {
         setIsLoading(false)
       }
     },
-    []
+    [safeFetch]
   )
 
   const updateTask = async (
@@ -57,7 +92,7 @@ export function useTaskApi() {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`/api/tasks/${taskId}`, {
+      const response = await safeFetch(`/api/tasks/${taskId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +123,7 @@ export function useTaskApi() {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`/api/tasks/${taskId}`, {
+      const response = await safeFetch(`/api/tasks/${taskId}`, {
         method: 'DELETE',
       })
 
@@ -118,7 +153,7 @@ export function useTaskApi() {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`/api/tasks/${taskId}/duplicate`, {
+      const response = await safeFetch(`/api/tasks/${taskId}/duplicate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -160,7 +195,9 @@ export function useTaskApi() {
           })
         }
 
-        const response = await fetch(`/api/tasks?${searchParams.toString()}`)
+        const response = await safeFetch(
+          `/api/tasks?${searchParams.toString()}`
+        )
 
         if (!response.ok) {
           const errorData = await response.json()
@@ -179,14 +216,14 @@ export function useTaskApi() {
         setIsLoading(false)
       }
     },
-    []
+    [safeFetch]
   )
 
   const getTask = async (taskId: string): Promise<TaskWithDetails | null> => {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`/api/tasks/${taskId}`)
+      const response = await safeFetch(`/api/tasks/${taskId}`)
 
       if (!response.ok) {
         const errorData = await response.json()
